@@ -15,7 +15,7 @@
                     <Button Content="Optimise" Padding="18,6" Margin="0,0,8,0" IsEnabled="False" />
                     <Button Content="Cancel" Padding="18,6" IsEnabled="False" />
                 </StackPanel>
-                <TextBlock Text="0 images" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ImageCountText}" VerticalAlignment="Center" />
             </DockPanel>
             <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
         </StackPanel>
@@ -29,8 +29,8 @@
 
             <DockPanel Grid.Column="0">
                 <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                    <Button Content="Import images…" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
-                    <Button Content="Import folder…" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
+                    <Button Content="Import images…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportImages_Click"/>
+                    <Button Content="Import folder…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportFolder_Click"/>
                     <Button Content="Select all" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
                 </WrapPanel>
                 <WrapPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
@@ -39,16 +39,65 @@
                 </WrapPanel>
                 <Grid>
                     <DataGrid AutoGenerateColumns="False" IsReadOnly="True"
+                              ItemsSource="{Binding Images}"
                               CanUserAddRows="False" CanUserDeleteRows="False"
                               SelectionMode="Extended" SelectionUnit="FullRow"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                               AutomationProperties.Name="Imported images">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Filename" Width="*" MinWidth="110" />
-                            <DataGridTextColumn Header="Format" Width="60" />
-                            <DataGridTextColumn Header="Dimensions" Width="95" />
-                            <DataGridTextColumn Header="Original size" Width="95" />
-                            <DataGridTextColumn Header="Status" Width="85" />
+
+                            <DataGridTextColumn
+                                Header="Filename"
+                                Width="*"
+                                MinWidth="110"
+                                Binding="{Binding FileName}" />
+
+                            <DataGridTextColumn
+                                Header="Format"
+                                Width="70"
+                                Binding="{Binding Format}" />
+
+                            <DataGridTemplateColumn
+                                Header="Dimensions"
+                                Width="110">    
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+
+                                        <TextBlock>
+                                            <TextBlock.Text>
+
+                                                <MultiBinding StringFormat="{}{0:0} × {1:0}">
+                                                     <Binding Path="Width" />
+                                                     <Binding Path="Height" />
+                                                 </MultiBinding>
+
+                                            </TextBlock.Text>
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn
+                                 Header="Original size"
+                                 Width="120"
+                                 Binding="{Binding OriginalSizeBytes,
+                                                      StringFormat={}{0:N0} bytes}" />
+
+                            <DataGridTemplateColumn
+                                Header="Status"
+                                Width="85">
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="Ready" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+
+                            </DataGridTemplateColumn>
+
                         </DataGrid.Columns>
                     </DataGrid>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"

@@ -1,6 +1,27 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {}
+    "net10.0": {
+      "SkiaSharp": {
+        "type": "Direct",
+        "requested": "[4.152.0, )",
+        "resolved": "4.152.0",
+        "contentHash": "TfYpxUV/Ihe5WyGeddJROZA2RhfGaSEKKNDHhREUVCVihtTlcavHQEi29Q0Mtn37AYXAf7EbC+StVPmWk63tkQ==",
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "4.152.0",
+          "SkiaSharp.NativeAssets.macOS": "4.152.0"
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS": {
+        "type": "Transitive",
+        "resolved": "4.152.0",
+        "contentHash": "Vjx2sPleQDJXQjINxMzHaIU1KFyYAUerfBnwLAjMGSUCf0vCrSU2Y4LvCH0yAheeuu0YdlVfeSMiCKZYVJ12kA=="
+      },
+      "SkiaSharp.NativeAssets.Win32": {
+        "type": "Transitive",
+        "resolved": "4.152.0",
+        "contentHash": "PfyLS6TRP/9YghtW97le8bkzootCietlt7QUqFKGjGcZ6eRjeWNNHCjvxO41O/LYpV4gCthp2xiiUiYTOqfVyA=="
+      }
+    }
   }
 }
