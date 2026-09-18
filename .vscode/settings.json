@@ -1,0 +1,10 @@
+{
+  "dotnet.defaultSolution": "NexMedia.WebImageOptimiser.sln",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4
+}

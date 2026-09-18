@@ -1,0 +1,15 @@
+# Build and test output
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# private images
+local-assets/
+exports/
