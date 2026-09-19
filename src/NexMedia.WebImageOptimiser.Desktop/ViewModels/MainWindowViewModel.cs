@@ -1,9 +1,10 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Collections.ObjectModel;
+using NexMedia.WebImageOptimiser.Core.Configuration;
 using NexMedia.WebImageOptimiser.Core.Importing;
 using NexMedia.WebImageOptimiser.Core.Models;
-using NexMedia.WebImageOptimiser.Core.Configuration;
+using NexMedia.WebImageOptimiser.Core.Processing;
 
 namespace NexMedia.WebImageOptimiser.Desktop.ViewModels;
 
@@ -13,7 +14,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private bool isImporting;
 
-    public ObservableCollection<ImageEntry> Images { get; } = [];
+    public ObservableCollection<ImageBatchItem> Images { get; } = [];
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -33,6 +34,112 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new(nameof(SelectedPreset)));
             PropertyChanged?.Invoke(this, new(nameof(PresetDimensions)));
         }
+    }
+
+    public void RemoveImages(IEnumerable<ImageBatchItem> images)
+    {
+        ImageBatchItem[] imagesToRemove = images.ToArray();
+
+        foreach (ImageBatchItem image in imagesToRemove)
+        {
+            Images.Remove(image);
+        }
+
+        NotifyBatchChanged();
+    }
+
+    public void ClearImages()
+    {
+        Images.Clear();
+
+        NotifyBatchChanged();
+    }
+
+    private void NotifyBatchChanged()
+    {
+        PropertyChanged?.Invoke(this, new(nameof(ImageCountText)));
+        PropertyChanged?.Invoke(this, new(nameof(IsBatchEmpty)));
+    }
+
+    private RasterOutputFormat selectedOutputFormat = RasterOutputFormat.WebP;
+
+    private string targetSizeKilobytesText = "200";
+
+    private string minimumWebPQualityText = "60";
+
+    private bool allowFurtherDimensionReduction;
+
+    public bool TryCreateOptimisationSettings(
+        out OptimisationSettings? settings,
+        out string validationMessage)
+    {
+        settings = null;
+        validationMessage = string.Empty;
+
+        if (!long.TryParse(
+                TargetSizeKilobytesText,
+                NumberStyles.None,
+                CultureInfo.InvariantCulture,
+                out long targetKilobytes) ||
+            targetKilobytes <= 0)
+        {
+            validationMessage =
+                "Target size must be a positive whole number.";
+
+            return false;
+        }
+
+        if (targetKilobytes > long.MaxValue / 1000)
+        {
+            validationMessage = "Target size is too large.";
+            return false;
+        }
+
+        if (!int.TryParse(
+                MinimumWebPQualityText,
+                NumberStyles.None,
+                CultureInfo.InvariantCulture,
+                out int minimumQuality) ||
+            minimumQuality is < 1 or > 100)
+        {
+            validationMessage =
+                "Minimum WebP quality must be between 1 and 100.";
+
+            return false;
+        }
+
+        settings = new OptimisationSettings(
+            SelectedPreset.Bounds,
+            SelectedOutputFormat,
+            ResizeMode.FitWithin,
+            targetKilobytes * 1000,
+            minimumQuality,
+            AllowFurtherDimensionReduction);
+
+        return true;
+    }
+
+    public int ApplyOptimisationSettings(
+        IEnumerable<ImageBatchItem> images,
+        OptimisationSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(images);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        int appliedCount = 0;
+
+        foreach (ImageBatchItem image in images)
+        {
+            if (image.Format == ImageFileFormat.Svg)
+            {
+                continue;
+            }
+
+            image.ApplyOptimisationSettings(settings);
+            appliedCount++;
+        }
+
+        return appliedCount;
     }
 
     public bool IsImporting
@@ -58,6 +165,70 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public IReadOnlyList<RasterOutputFormat> OutputFormats { get; } =
+        Enum.GetValues<RasterOutputFormat>();
+
+    public RasterOutputFormat SelectedOutputFormat
+    {
+        get => selectedOutputFormat;
+
+        set
+        {
+            if (value == selectedOutputFormat)
+            {
+                return;
+            }
+
+            selectedOutputFormat = value;
+
+            PropertyChanged?.Invoke(
+                this,
+                new(nameof(SelectedOutputFormat)));
+        }
+    }
+
+    public string TargetSizeKilobytesText
+    {
+        get => targetSizeKilobytesText;
+
+        set
+        {
+            targetSizeKilobytesText = value;
+
+            PropertyChanged?.Invoke(
+                this,
+                new(nameof(TargetSizeKilobytesText)));
+        }
+    }
+
+    public string MinimumWebPQualityText
+    {
+        get => minimumWebPQualityText;
+
+        set
+        {
+            minimumWebPQualityText = value;
+
+            PropertyChanged?.Invoke(
+                this,
+                new(nameof(MinimumWebPQualityText)));
+        }
+    }
+
+    public bool AllowFurtherDimensionReduction
+    {
+        get => allowFurtherDimensionReduction;
+
+        set
+        {
+            allowFurtherDimensionReduction = value;
+
+            PropertyChanged?.Invoke(
+                this,
+                new(nameof(AllowFurtherDimensionReduction)));
+        }
+    }
+
     public bool CanImport => !IsImporting;
 
     public bool IsBatchEmpty =>
@@ -67,8 +238,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         Images.Count == 1
             ? "1 image"
             : $"{Images.Count} images";
+
     public Task<ImageImportResult> ImportFilesAsync(
-    IEnumerable<string> filePaths)
+        IEnumerable<string> filePaths)
     {
         return ImportAsync(
             () => ImageImportService.ImportFiles(
@@ -97,16 +269,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             foreach (ImageEntry image in result.ImportedImages)
             {
-                Images.Add(image);
+                Images.Add(
+                    new ImageBatchItem(image));
             }
 
-            PropertyChanged?.Invoke(
-                this,
-                new(nameof(ImageCountText)));
-
-            PropertyChanged?.Invoke(
-                this,
-                new(nameof(IsBatchEmpty)));
+            NotifyBatchChanged();
 
             return result;
         }

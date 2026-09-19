@@ -12,12 +12,21 @@
         <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
             <DockPanel Margin="0,0,0,10">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="Optimise" Padding="18,6" Margin="0,0,8,0" IsEnabled="False" />
+                    <Button x:Name="OptimiseButton"
+                            Content="Optimise selected"
+                            Padding="18,6"
+                            Margin="0,0,8,0"
+                            IsEnabled="False"
+                            Click="Optimise_Click" />
                     <Button Content="Cancel" Padding="18,6" IsEnabled="False" />
                 </StackPanel>
                 <TextBlock Text="{Binding ImageCountText}" VerticalAlignment="Center" />
             </DockPanel>
-            <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
+            <ProgressBar x:Name="OverallProgressBar"
+                         Minimum="0"
+                         Maximum="1"
+                         Value="0"
+                         Height="8" />
         </StackPanel>
 
         <Grid>
@@ -28,21 +37,27 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0">
-                <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <WrapPanel x:Name="BatchActionsPanel"
+                           DockPanel.Dock="Top"
+                           Margin="0,0,0,12">
                     <Button Content="Import images…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportImages_Click"/>
                     <Button Content="Import folder…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportFolder_Click"/>
-                    <Button Content="Select all" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
+                    <Button Content="Select all" Padding="12,6" Margin="0,0,8,6" Click="SelectAll_Click" />
+                    <Button x:Name="RemoveSelectedButton" Content="Remove selected" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" Click="RemoveSelected_Click" />
+                    <Button Content="Clear batch" Padding="12,6" Margin="0,0,8,6" Click="ClearBatch_Click" />
                 </WrapPanel>
                 <WrapPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
                     <Button Content="Export all successful…" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
                     <Button Content="Export selected…" Padding="12,6" Margin="0,0,0,6" IsEnabled="False" />
                 </WrapPanel>
                 <Grid>
-                    <DataGrid AutoGenerateColumns="False" IsReadOnly="True"
+                    <DataGrid x:Name="ImagesGrid"
+                              AutoGenerateColumns="False" IsReadOnly="True"
                               ItemsSource="{Binding Images}"
                               CanUserAddRows="False" CanUserDeleteRows="False"
-                              SelectionMode="Extended" SelectionUnit="FullRow"
+                              SelectionMode="Extended" SelectionUnit="FullRow" SelectionChanged="ImagesGrid_SelectionChanged"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               AutomationProperties.Name="Imported images">
                         <DataGrid.Columns>
 
@@ -59,7 +74,7 @@
 
                             <DataGridTemplateColumn
                                 Header="Dimensions"
-                                Width="110">    
+                                Width="110">
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -81,18 +96,49 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
+                                Header="Planned output"
+                                Width="120"
+                                Binding="{Binding PlannedDimensionsText}" />
+
+                            <DataGridTextColumn
                                  Header="Original size"
                                  Width="120"
                                  Binding="{Binding OriginalSizeBytes,
                                                       StringFormat={}{0:N0} bytes}" />
 
+                            <DataGridTextColumn
+                                Header="Final dimensions"
+                                Width="115"
+                                Binding="{Binding FinalDimensionsText}" />
+
+                            <DataGridTextColumn
+                                Header="Final size"
+                                Width="110"
+                                Binding="{Binding FinalSizeText}" />
+
+                            <DataGridTextColumn
+                                Header="Saved"
+                                Width="70"
+                                Binding="{Binding SavingsText}" />
+
+                            <DataGridTextColumn
+                                Header="Quality"
+                                Width="65"
+                                Binding="{Binding QualityText}" />
+
+                            <DataGridTextColumn
+                                Header="Target"
+                                Width="100"
+                                Binding="{Binding TargetResultText}" />
+
                             <DataGridTemplateColumn
                                 Header="Status"
-                                Width="85">
+                                Width="110">
 
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="Ready" />
+                                        <TextBlock Text="{Binding Status}"
+                                                   ToolTip="{Binding ErrorMessage}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
 
@@ -100,11 +146,32 @@
 
                         </DataGrid.Columns>
                     </DataGrid>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                                IsHitTestVisible="False" Margin="16">
-                        <TextBlock Text="No images imported" FontSize="18" HorizontalAlignment="Center" />
-                        <TextBlock Text="Planned inputs: JPEG, PNG, WebP and SVG"
-                                   Margin="0,8,0,0" TextWrapping="Wrap" TextAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                IsHitTestVisible="False"
+                                Margin="16">
+
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBatchEmpty}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <TextBlock Text="No images imported"
+                                   FontSize="18"
+                                   HorizontalAlignment="Center" />
+
+                        <TextBlock Text="JPEG, PNG, WebP and SVG are supported."
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center" />
+
                     </StackPanel>
                 </Grid>
             </DockPanel>
@@ -125,14 +192,40 @@
                     </GroupBox>
                     <GroupBox Header="Planned output defaults" Padding="12" Margin="0,14,0,0">
                         <StackPanel>
-                            <TextBlock Text="Raster format: WebP" />
-                            <TextBlock Text="{Binding DefaultTargetLabel}" Margin="0,8,0,0" />
-                            <TextBlock Text="Minimum WebP quality: 60 / 100" Margin="0,8,0,0" />
-                            <TextBlock Text="PNG will preserve transparency. SVG will remain vector."
-                                       Margin="0,12,0,0" TextWrapping="Wrap" />
-                            <TextBlock Text="Each selected group will have its own settings."
-                                       Margin="0,12,0,12" TextWrapping="Wrap" />
-                            <Button Content="Apply to selection" Padding="12,6" IsEnabled="False" />
+                            <Label Content="Raster output format"
+                                   Padding="0,0,0,4" />
+
+                            <ComboBox ItemsSource="{Binding OutputFormats}"
+                                      SelectedItem="{Binding SelectedOutputFormat}"
+                                      Padding="4" />
+
+                            <Label Content="Maximum output size (KB)"
+                                   Padding="0,12,0,4" />
+
+                            <TextBox Text="{Binding TargetSizeKilobytesText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="4" />
+
+                            <Label Content="Minimum WebP quality (1–100)"
+                                   Padding="0,12,0,4" />
+
+                            <TextBox Text="{Binding MinimumWebPQualityText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="4" />
+
+                            <CheckBox Content="Reduce dimensions further if required"
+                                      IsChecked="{Binding AllowFurtherDimensionReduction}"
+                                      Margin="0,12,0,0" />
+
+                            <TextBlock Text="PNG uses lossless encoding. SVG files remain vector."
+                                       Margin="0,12,0,0"
+                                       TextWrapping="Wrap" />
+
+                            <TextBlock Text="Apply these settings to each selected group before optimising."
+                                       Margin="0,12,0,12"
+                                       TextWrapping="Wrap" />
+
+                            <Button x:Name="ApplySelectionButton" Content="Apply to selection" Padding="12,6" IsEnabled="False" Click="ApplyToSelection_Click" />
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>
