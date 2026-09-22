@@ -170,6 +170,78 @@ public class RasterResizeProcessorTests
     }
 
     [TestMethod]
+    public void Resize_CropMode_CropsFromCentreWithoutStretching()
+    {
+        string filePath =
+            Path.Combine(
+                _testDirectory,
+                "crop-source.png");
+
+        using (var source =
+               new SKBitmap(
+                   600,
+                   400,
+                   SKColorType.Rgba8888,
+                   SKAlphaType.Premul))
+        {
+            source.Erase(SKColors.Lime);
+
+            using var canvas =
+                new SKCanvas(source);
+            using var outsidePaint =
+                new SKPaint
+                {
+                    Color = SKColors.Magenta
+                };
+
+            canvas.DrawRect(
+                new SKRect(0, 0, 100, 400),
+                outsidePaint);
+            canvas.DrawRect(
+                new SKRect(500, 0, 600, 400),
+                outsidePaint);
+
+            using var image =
+                SKImage.FromBitmap(source);
+            using SKData encoded =
+                image.Encode(
+                    SKEncodedImageFormat.Png,
+                    100);
+            using var output =
+                File.Create(filePath);
+            encoded.SaveTo(output);
+        }
+
+        var item =
+            new ImageBatchItem(
+                new ImageEntry
+                {
+                    FilePath = filePath,
+                    Format = ImageFileFormat.Png,
+                    Width = 600,
+                    Height = 400,
+                    OriginalSizeBytes =
+                        new FileInfo(filePath).Length
+                });
+
+        item.ApplyResizeSettings(
+            new ResizeSettings
+            {
+                Bounds = new ResizeBounds(200, 200),
+                Mode = ImageResizeMode.Crop
+            });
+
+        using SKBitmap result =
+            RasterResizeProcessor.Resize(item);
+
+        Assert.AreEqual(200, result.Width);
+        Assert.AreEqual(200, result.Height);
+        Assert.AreEqual(SKColors.Lime, result.GetPixel(0, 100));
+        Assert.AreEqual(SKColors.Lime, result.GetPixel(199, 100));
+        Assert.AreEqual(SKColors.Lime, result.GetPixel(100, 100));
+    }
+
+    [TestMethod]
     public void Resize_WithoutPlan_ThrowsException()
     {
         string filePath =
@@ -187,29 +259,6 @@ public class RasterResizeProcessorTests
             Height = 600,
             OriginalSizeBytes =
                 new FileInfo(filePath).Length
-        };
-
-        var item =
-            new ImageBatchItem(entry);
-
-        Assert.ThrowsExactly<InvalidOperationException>(
-            () =>
-            {
-                using SKBitmap result =
-                    RasterResizeProcessor.Resize(item);
-            });
-    }
-
-    [TestMethod]
-    public void Resize_Svg_ThrowsException()
-    {
-        var entry = new ImageEntry
-        {
-            FilePath = @"C:\Images\logo.svg",
-            Format = ImageFileFormat.Svg,
-            Width = 800,
-            Height = 600,
-            OriginalSizeBytes = 1000
         };
 
         var item =

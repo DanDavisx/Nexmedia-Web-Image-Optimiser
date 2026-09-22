@@ -1,0 +1,12 @@
+{
+  "intervalSeconds": 10,
+  "characterDelayMilliseconds": 45,
+  "characterFadeDurationMilliseconds": 120,
+  "messages": [
+    "Let’s make every byte count.",
+    "What are we optimising today?",
+    "Let’s clean up some images.",
+    "Ready when you are.",
+    "Let’s make these images web-ready."
+  ]
+}

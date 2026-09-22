@@ -10,14 +10,13 @@ namespace NexMedia.WebImageOptimiser.Core.Tests;
 public class ResizeSettingsTests
 {
     [TestMethod]
-    public void Defaults_PreserveAspectRatioAndDisableUpscaling()
+    public void Defaults_DisableUpscalingAndUseFitMode()
     {
         var settings = new ResizeSettings
         {
             Bounds = new ResizeBounds(1920, 1080)
         };
 
-        Assert.IsTrue(settings.PreserveAspectRatio);
         Assert.IsFalse(settings.AllowUpscaling);
         Assert.AreEqual(ImageResizeMode.Fit, settings.Mode);
     }

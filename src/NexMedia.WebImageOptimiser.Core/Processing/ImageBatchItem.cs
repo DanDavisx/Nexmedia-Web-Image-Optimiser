@@ -1,6 +1,7 @@
 // Store each imported image's planned processing settings and output dimensions.
 
 using System.ComponentModel;
+using System.IO;
 using NexMedia.WebImageOptimiser.Core.Configuration;
 using NexMedia.WebImageOptimiser.Core.Models;
 
@@ -74,10 +75,19 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
 
     private string? errorMessage;
 
+    private string? exportPath;
+
     public string PlannedDimensionsText =>
         PlannedDimensions is null
-            ? "Not set"
+            ? "Dimensions not set"
             : $"{PlannedDimensions.Width} × {PlannedDimensions.Height}";
+
+    public string? ExportPath => exportPath;
+
+    public string ExportFileNameText =>
+        exportPath is null
+            ? "Not yet exported"
+            : Path.GetFileName(exportPath);
 
     public ImageBatchItem(ImageEntry source)
     {
@@ -110,6 +120,7 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
         var resizeSettings = new ResizeSettings
         {
             Bounds = settings.Bounds,
+            AllowUpscaling = settings.AllowUpscaling,
 
             Mode = settings.ResizeMode switch
             {
@@ -130,6 +141,7 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
         optimisationResult = null;
         status = "Ready";
         errorMessage = null;
+        exportPath = null;
 
         NotifyOptimisationChanged();
     }
@@ -138,6 +150,26 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
     {
         status = "Processing";
         errorMessage = null;
+        exportPath = null;
+
+        NotifyOptimisationChanged();
+    }
+
+    public void MarkExported(string outputPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
+
+        exportPath = outputPath;
+        status = "Exported";
+        errorMessage = null;
+
+        NotifyOptimisationChanged();
+    }
+
+    public void MarkExportFailed(string message)
+    {
+        status = "Export failed";
+        errorMessage = message;
 
         NotifyOptimisationChanged();
     }
@@ -154,6 +186,7 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
             : "Target missed";
 
         errorMessage = null;
+        exportPath = null;
 
         NotifyOptimisationChanged();
     }
@@ -163,14 +196,6 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
         optimisationResult = null;
         status = "Failed";
         errorMessage = message;
-
-        NotifyOptimisationChanged();
-    }
-
-    public void MarkSvgPreserved()
-    {
-        status = "SVG preserved";
-        errorMessage = null;
 
         NotifyOptimisationChanged();
     }
@@ -187,7 +212,9 @@ public sealed class ImageBatchItem : INotifyPropertyChanged
             nameof(FinalSizeText),
             nameof(SavingsText),
             nameof(QualityText),
-            nameof(TargetResultText)
+            nameof(TargetResultText),
+            nameof(ExportPath),
+            nameof(ExportFileNameText)
         ];
 
         foreach (string propertyName in propertyNames)

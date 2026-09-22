@@ -1,235 +1,1320 @@
 <Window x:Class="NexMedia.WebImageOptimiser.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="NexMedia · Web Image Optimiser"
-        Width="1120" Height="720" MinWidth="900" MinHeight="600"
-        WindowStartupLocation="CenterScreen">
-    <DockPanel Margin="20">
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
-            <TextBlock Text="Web Image Optimiser" FontSize="24" FontWeight="SemiBold" />
-        </StackPanel>
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:converters="clr-namespace:NexMedia.WebImageOptimiser.Desktop.Converters"
+        Title="NexMedia Web Image Optimiser"
+        Icon="Assets/Nexmedia-app-icon.ico"
+        Width="1600"
+        Height="1000"
+        MinWidth="1040"
+        MinHeight="680"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontFamily="Segoe UI"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
 
-        <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
-            <DockPanel Margin="0,0,0,10">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button x:Name="OptimiseButton"
-                            Content="Optimise selected"
-                            Padding="18,6"
-                            Margin="0,0,8,0"
-                            IsEnabled="False"
-                            Click="Optimise_Click" />
-                    <Button Content="Cancel" Padding="18,6" IsEnabled="False" />
-                </StackPanel>
-                <TextBlock Text="{Binding ImageCountText}" VerticalAlignment="Center" />
-            </DockPanel>
-            <ProgressBar x:Name="OverallProgressBar"
-                         Minimum="0"
-                         Maximum="1"
-                         Value="0"
-                         Height="8" />
-        </StackPanel>
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        StateChanged="Window_StateChanged">
+
+    <Window.Resources>
+        <converters:RasterThumbnailConverter x:Key="RasterThumbnailConverter" />
+        <converters:FileSizeConverter x:Key="FileSizeConverter" />
+        <Style x:Key="HelpButtonReferenceStyle" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonGradientBrush}" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Padding" Value="7,3" />
+            <Setter Property="Margin" Value="3,2" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="TextElement.Foreground" Value="#101318" />
+            <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+        </Style>
+    </Window.Resources>
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="48"
+                            ResizeBorderThickness="6"
+                            GlassFrameThickness="0"
+                            CornerRadius="10"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Border x:Name="WindowFrame"
+            Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}">
+        <Border.Style>
+            <Style TargetType="{x:Type Border}">
+                <Setter Property="CornerRadius" Value="11" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                 Value="Maximized">
+                        <Setter Property="CornerRadius" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="18" />
-                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="52*"/>
+                <ColumnDefinition Width="747*"/>
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <DockPanel Grid.Column="0">
-                <WrapPanel x:Name="BatchActionsPanel"
-                           DockPanel.Dock="Top"
-                           Margin="0,0,0,12">
-                    <Button Content="Import images…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportImages_Click"/>
-                    <Button Content="Import folder…" Padding="12,6" Margin="0,0,8,6" IsEnabled="True" Click="ImportFolder_Click"/>
-                    <Button Content="Select all" Padding="12,6" Margin="0,0,8,6" Click="SelectAll_Click" />
-                    <Button x:Name="RemoveSelectedButton" Content="Remove selected" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" Click="RemoveSelected_Click" />
-                    <Button Content="Clear batch" Padding="12,6" Margin="0,0,8,6" Click="ClearBatch_Click" />
-                </WrapPanel>
-                <WrapPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
-                    <Button Content="Export all successful…" Padding="12,6" Margin="0,0,8,6" IsEnabled="False" />
-                    <Button Content="Export selected…" Padding="12,6" Margin="0,0,0,6" IsEnabled="False" />
-                </WrapPanel>
+            <Border Grid.Row="0"
+                    Background="{DynamicResource TitleBarBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="10,10,0,0" Grid.ColumnSpan="2">
                 <Grid>
-                    <DataGrid x:Name="ImagesGrid"
-                              AutoGenerateColumns="False" IsReadOnly="True"
-                              ItemsSource="{Binding Images}"
-                              CanUserAddRows="False" CanUserDeleteRows="False"
-                              SelectionMode="Extended" SelectionUnit="FullRow" SelectionChanged="ImagesGrid_SelectionChanged"
-                              HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                              AutomationProperties.Name="Imported images">
-                        <DataGrid.Columns>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                            <DataGridTextColumn
-                                Header="Filename"
-                                Width="*"
-                                MinWidth="110"
-                                Binding="{Binding FileName}" />
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="18,0,0,0">
+                        <Border Width="28"
+                                Height="28">
+                            <Image Source="Assets/Nexmedia-app-icon.ico"
+                               Width="24"
+                               Height="24"
+                               Stretch="Uniform"
+                               SnapsToDevicePixels="True" />
+                        </Border>
 
-                            <DataGridTextColumn
-                                Header="Format"
-                                Width="70"
-                                Binding="{Binding Format}" />
+                        <TextBlock Text="NexMedia Web Image Optimiser"
+                                   Margin="11,0,0,0"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
 
-                            <DataGridTemplateColumn
-                                Header="Dimensions"
-                                Width="110">
-
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-
-                                        <TextBlock>
-                                            <TextBlock.Text>
-
-                                                <MultiBinding StringFormat="{}{0:0} × {1:0}">
-                                                     <Binding Path="Width" />
-                                                     <Binding Path="Height" />
-                                                 </MultiBinding>
-
-                                            </TextBlock.Text>
-                                        </TextBlock>
-
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-
-                            </DataGridTemplateColumn>
-
-                            <DataGridTextColumn
-                                Header="Planned output"
-                                Width="120"
-                                Binding="{Binding PlannedDimensionsText}" />
-
-                            <DataGridTextColumn
-                                 Header="Original size"
-                                 Width="120"
-                                 Binding="{Binding OriginalSizeBytes,
-                                                      StringFormat={}{0:N0} bytes}" />
-
-                            <DataGridTextColumn
-                                Header="Final dimensions"
-                                Width="115"
-                                Binding="{Binding FinalDimensionsText}" />
-
-                            <DataGridTextColumn
-                                Header="Final size"
-                                Width="110"
-                                Binding="{Binding FinalSizeText}" />
-
-                            <DataGridTextColumn
-                                Header="Saved"
-                                Width="70"
-                                Binding="{Binding SavingsText}" />
-
-                            <DataGridTextColumn
-                                Header="Quality"
-                                Width="65"
-                                Binding="{Binding QualityText}" />
-
-                            <DataGridTextColumn
-                                Header="Target"
-                                Width="100"
-                                Binding="{Binding TargetResultText}" />
-
-                            <DataGridTemplateColumn
-                                Header="Status"
-                                Width="110">
-
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Status}"
-                                                   ToolTip="{Binding ErrorMessage}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-
-                            </DataGridTemplateColumn>
-
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <StackPanel VerticalAlignment="Center"
-                                HorizontalAlignment="Center"
-                                IsHitTestVisible="False"
-                                Margin="16">
-
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Collapsed" />
-
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsBatchEmpty}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-
-                        <TextBlock Text="No images imported"
-                                   FontSize="18"
-                                   HorizontalAlignment="Center" />
-
-                        <TextBlock Text="JPEG, PNG, WebP and SVG are supported."
-                                   Margin="0,8,0,0"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center" />
-
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button Content="&#xE921;"
+                                Style="{StaticResource TitleBarButtonStyle}"
+                                AutomationProperties.Name="Minimise"
+                                Click="MinimiseWindow_Click" />
+                        <Button x:Name="MaximiseRestoreButton"
+                                Content="&#xE922;"
+                                Style="{StaticResource TitleBarButtonStyle}"
+                                AutomationProperties.Name="Maximise or restore"
+                                Click="MaximiseRestoreWindow_Click" />
+                        <Button Content="&#xE8BB;"
+                                Style="{StaticResource TitleBarButtonStyle}"
+                                AutomationProperties.Name="Close"
+                                Click="CloseWindow_Click" />
                     </StackPanel>
                 </Grid>
-            </DockPanel>
+            </Border>
 
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <GroupBox Header="Starting presets" Padding="12">
-                        <StackPanel>
-                            <Label Content="Size preset" Target="{Binding ElementName=PresetPicker}" Padding="0,0,0,6" />
-                            <ComboBox x:Name="PresetPicker" ItemsSource="{Binding Presets}"
-                                      SelectedItem="{Binding SelectedPreset}" DisplayMemberPath="Name"
-                                      Padding="4" />
-                            <TextBlock Text="{Binding PresetDimensions}" Margin="0,12,0,4" TextWrapping="Wrap" />
-                            <TextBlock Text="Preserve aspect ratio · No upscaling" TextWrapping="Wrap" />
-                            <TextBlock Text="Crop to fill will be an explicit option."
-                                       Margin="0,8,0,0" TextWrapping="Wrap" />
+            <Grid Grid.Row="1"
+                  Margin="26,20,26,20" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0"
+                      Margin="2,0,2,18">
+
+                    <Grid Margin="-19,-2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="2"
+                                    Margin="24,0,6,0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                            <ToggleButton x:Name="SettingsNavigationButton"
+                                          Content="&#xE713;"
+                                          Style="{StaticResource HeaderNavigationButtonStyle}"
+                                          ToolTip="Settings"
+                                          AutomationProperties.Name="Settings"
+                                          Click="SettingsNavigation_Click" />
+                            <ToggleButton x:Name="HelpNavigationButton"
+                                          Content="&#xE897;"
+                                          Style="{StaticResource HeaderNavigationButtonStyle}"
+                                          Margin="6,0,0,0"
+                                          ToolTip="Help"
+                                          AutomationProperties.Name="Help"
+                                          Click="HelpNavigation_Click" />
                         </StackPanel>
-                    </GroupBox>
-                    <GroupBox Header="Planned output defaults" Padding="12" Margin="0,14,0,0">
-                        <StackPanel>
-                            <Label Content="Raster output format"
-                                   Padding="0,0,0,4" />
 
-                            <ComboBox ItemsSource="{Binding OutputFormats}"
-                                      SelectedItem="{Binding SelectedOutputFormat}"
-                                      Padding="4" />
-
-                            <Label Content="Maximum output size (KB)"
-                                   Padding="0,12,0,4" />
-
-                            <TextBox Text="{Binding TargetSizeKilobytesText,
-                                                    UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="4" />
-
-                            <Label Content="Minimum WebP quality (1–100)"
-                                   Padding="0,12,0,4" />
-
-                            <TextBox Text="{Binding MinimumWebPQualityText,
-                                                    UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="4" />
-
-                            <CheckBox Content="Reduce dimensions further if required"
-                                      IsChecked="{Binding AllowFurtherDimensionReduction}"
-                                      Margin="0,12,0,0" />
-
-                            <TextBlock Text="PNG uses lossless encoding. SVG files remain vector."
-                                       Margin="0,12,0,0"
-                                       TextWrapping="Wrap" />
-
-                            <TextBlock Text="Apply these settings to each selected group before optimising."
-                                       Margin="0,12,0,12"
-                                       TextWrapping="Wrap" />
-
-                            <Button x:Name="ApplySelectionButton" Content="Apply to selection" Padding="12,6" IsEnabled="False" Click="ApplyToSelection_Click" />
+                        <StackPanel x:Name="MainHeaderCopy"
+                                    Grid.Column="1"
+                                    Margin="18,4,0,0"
+                                    VerticalAlignment="Top">
+                            <TextBlock x:Name="RotatingHeadlineText"
+                                       Text="Let’s make every byte count."
+                                       FontSize="29"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Convert, resize and optimise images for web in seconds."
+                                       FontSize="14"
+                                       Style="{StaticResource MutedTextStyle}" />
                         </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="18" />
+                        <ColumnDefinition Width="310" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <WrapPanel x:Name="BatchActionsPanel"
+                                   Grid.Row="0"
+                                   Margin="2,0,0,13">
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="0,0,9,6"
+                                    IsEnabled="True"
+                                    Click="ImportImages_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE710;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                               FontSize="16"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Import images…" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Margin="0,0,9,6"
+                                    IsEnabled="True"
+                                    Click="ImportFolder_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE838;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Import folder…" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Margin="0,0,9,6"
+                                    Click="SelectAll_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE762;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Select all" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="RemoveSelectedButton"
+                                    Margin="0,0,9,6"
+                                    IsEnabled="False"
+                                    Click="RemoveSelected_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE74D;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Remove selected" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Margin="0,0,9,6"
+                                    Click="ClearBatch_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE894;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Clear batch" />
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+
+                        <Border Grid.Row="1"
+                                Style="{StaticResource CardStyle}"
+                                Padding="0"
+                                ClipToBounds="True">
+                            <Grid>
+                                <Grid x:Name="ImageAreaContent">
+                                <ListBox x:Name="ImagesGrid"
+                                         ItemsSource="{Binding Images}"
+                                         SelectionMode="Extended"
+                                         SelectionChanged="ImagesGrid_SelectionChanged"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Padding="7"
+                                         Foreground="{DynamicResource PrimaryTextBrush}"
+                                         HorizontalContentAlignment="Stretch"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         ScrollViewer.CanContentScroll="True"
+                                         VirtualizingPanel.IsVirtualizing="True"
+                                         VirtualizingPanel.VirtualizationMode="Recycling"
+                                         AutomationProperties.Name="Imported images">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListBoxItem}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0,0,0,8" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                        <Border x:Name="ImageCard"
+                                                                Background="{DynamicResource SurfaceBrush}"
+                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="10"
+                                                                Padding="14"
+                                                                SnapsToDevicePixels="True">
+                                                            <ContentPresenter />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="Background"
+                                                                        Value="{DynamicResource RaisedSurfaceBrush}" />
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="BorderBrush"
+                                                                        Value="{DynamicResource BorderBrush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="Background"
+                                                                        Value="{DynamicResource SelectionBrush}" />
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="BorderBrush"
+                                                                        Value="{DynamicResource AccentBrush}" />
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="BorderThickness"
+                                                                        Value="2" />
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="Padding"
+                                                                        Value="13" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter TargetName="ImageCard"
+                                                                        Property="Opacity"
+                                                                        Value="0.55" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid MinHeight="108">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="26" />
+                                                    <ColumnDefinition Width="176" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <CheckBox Grid.Column="0"
+                                                          Margin="0,0,8,0"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
+                                                          Focusable="False"
+                                                          IsChecked="{Binding IsSelected, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
+                                                          PreviewMouseLeftButtonDown="ImageSelectionCheckBox_PreviewMouseLeftButtonDown"
+                                                          AutomationProperties.Name="{Binding FileName, StringFormat=Select {0}}" />
+
+                                                <Border Grid.Column="1"
+                                                        Width="176"
+                                                        Height="99"
+                                                        Background="{DynamicResource RaisedSurfaceBrush}"
+                                                        BorderBrush="{DynamicResource BorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="8"
+                                                        ClipToBounds="True">
+                                                    <Grid>
+                                                        <TextBlock Text="&#xE91B;"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="28"
+                                                                   Foreground="{DynamicResource DisabledBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                        <Image Source="{Binding Converter={StaticResource RasterThumbnailConverter}, IsAsync=True}"
+                                                               Stretch="UniformToFill" />
+                                                    </Grid>
+                                                </Border>
+
+                                                <Grid Grid.Column="2"
+                                                      Margin="18,0,0,0">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Text="{Binding FileName}"
+                                                                   Margin="0,0,12,0"
+                                                                   FontSize="17"
+                                                                   FontWeight="SemiBold"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   ToolTip="{Binding FilePath}" />
+
+                                                        <Border Grid.Column="1"
+                                                                Padding="9,4"
+                                                                CornerRadius="10"
+                                                                ToolTip="{Binding ErrorMessage}">
+                                                            <Border.Style>
+                                                                <Style TargetType="{x:Type Border}">
+                                                                    <Setter Property="Background" Value="{DynamicResource RaisedSurfaceBrush}" />
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                                                    <Setter Property="BorderThickness" Value="1" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Complete">
+                                                                            <Setter Property="TextElement.Foreground" Value="White" />
+                                                                            <Setter Property="Background" Value="#2A9A61" />
+                                                                            <Setter Property="BorderBrush" Value="#2A9A61" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Exported">
+                                                                            <Setter Property="TextElement.Foreground" Value="White" />
+                                                                            <Setter Property="Background" Value="#173A2A" />
+                                                                            <Setter Property="BorderBrush" Value="#2A9A61" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Processing">
+                                                                            <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+                                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Target missed">
+                                                                            <Setter Property="TextElement.Foreground" Value="White" />
+                                                                            <Setter Property="Background" Value="#3A1C20" />
+                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                                                            <Setter Property="TextElement.Foreground" Value="White" />
+                                                                            <Setter Property="Background" Value="#3A1C20" />
+                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Export failed">
+                                                                            <Setter Property="TextElement.Foreground" Value="White" />
+                                                                            <Setter Property="Background" Value="#3A1C20" />
+                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Text="{Binding Status}"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold" />
+                                                        </Border>
+                                                    </Grid>
+
+                                                    <WrapPanel Grid.Row="1"
+                                                               Margin="0,5,0,0">
+                                                        <TextBlock Text="{Binding Format}"
+                                                                   Style="{StaticResource MutedTextStyle}" />
+                                                        <TextBlock Text="  •  "
+                                                                   Style="{StaticResource MutedTextStyle}" />
+                                                        <TextBlock Style="{StaticResource MutedTextStyle}">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="{}{0:0} × {1:0}">
+                                                                    <Binding Path="Width" />
+                                                                    <Binding Path="Height" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                        <TextBlock Text="  •  "
+                                                                   Style="{StaticResource MutedTextStyle}" />
+                                                        <TextBlock Text="{Binding OriginalSizeBytes, Converter={StaticResource FileSizeConverter}}"
+                                                                   Style="{StaticResource MutedTextStyle}" />
+                                                    </WrapPanel>
+
+                                                    <Grid Grid.Row="2"
+                                                          Margin="0,13,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="PLANNED"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold" />
+                                                            <Grid Margin="0,3,0,0">
+                                                                <TextBlock Text="Output format and dimensions not set">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="{x:Type TextBlock}"
+                                                                               BasedOn="{StaticResource MutedTextStyle}">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+
+                                                                <WrapPanel>
+                                                                    <WrapPanel.Style>
+                                                                        <Style TargetType="{x:Type WrapPanel}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </WrapPanel.Style>
+                                                                    <TextBlock Text="{Binding AssignedOptimisationSettings.OutputFormat}" />
+                                                                    <TextBlock Text="  •  "
+                                                                               Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding PlannedDimensionsText}" />
+                                                                </WrapPanel>
+                                                            </Grid>
+                                                            <StackPanel Margin="0,3,0,0">
+                                                                <TextBlock Text="File size target not set">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="{x:Type TextBlock}"
+                                                                               BasedOn="{StaticResource MutedTextStyle}">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <StackPanel.Style>
+                                                                        <Style TargetType="{x:Type StackPanel}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </StackPanel.Style>
+                                                                    <TextBlock Text="File size target: "
+                                                                               Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding AssignedOptimisationSettings.TargetSizeBytes, Converter={StaticResource FileSizeConverter}}"
+                                                                               Style="{StaticResource MutedTextStyle}" />
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1"
+                                                                    Margin="12,0,0,0">
+                                                            <TextBlock Text="RESULT"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold" />
+
+                                                            <TextBlock Text="No output yet"
+                                                                       Margin="0,7,0,0">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="{x:Type TextBlock}"
+                                                                           BasedOn="{StaticResource MutedTextStyle}">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding OptimisationResult}"
+                                                                                         Value="{x:Null}">
+                                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+
+                                                            <StackPanel>
+                                                                <StackPanel.Style>
+                                                                    <Style TargetType="{x:Type StackPanel}">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding OptimisationResult}"
+                                                                                         Value="{x:Null}">
+                                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </StackPanel.Style>
+                                                                <WrapPanel Margin="0,3,0,0">
+                                                                    <TextBlock Text="{Binding FinalDimensionsText}" />
+                                                                    <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding OptimisationResult.SizeBytes, Converter={StaticResource FileSizeConverter}}" />
+                                                                    <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding SavingsText, StringFormat={}{0} saved}" />
+                                                                </WrapPanel>
+                                                                <WrapPanel Margin="0,3,0,0">
+                                                                    <TextBlock Text="Quality " Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding QualityText}" Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="  •  Target " Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding TargetResultText}" Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="  •  File " Style="{StaticResource MutedTextStyle}" />
+                                                                    <TextBlock Text="{Binding ExportFileNameText}"
+                                                                               Style="{StaticResource MutedTextStyle}"
+                                                                               ToolTip="{Binding ExportPath}" />
+                                                                </WrapPanel>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <StackPanel VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            IsHitTestVisible="False"
+                                            Margin="20">
+                                    <StackPanel.Style>
+                                        <Style TargetType="{x:Type StackPanel}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBatchEmpty}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <TextBlock Text="No images imported"
+                                               Margin="0,18,0,0"
+                                               FontSize="22"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" />
+
+                                    <TextBlock Text="Import images or a folder to get started."
+                                               Margin="0,8,0,0"
+                                               FontSize="14"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               HorizontalAlignment="Center" />
+
+                                    <TextBlock Text="JPEG, PNG and WebP are supported."
+                                               Margin="0,6,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                                </Grid>
+
+                                <Border x:Name="OptimisingOverlay"
+                                        Visibility="Collapsed"
+                                        Opacity="0"
+                                        Background="{DynamicResource SurfaceBrush}"
+                                        CornerRadius="10"
+                                        IsHitTestVisible="True"
+                                        AutomationProperties.Name="Optimisation in progress">
+                                    <StackPanel HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                        <Image x:Name="OptimisingSpinnerFrame"
+                                               Width="128"
+                                               Height="128"
+                                               Stretch="None"
+                                               SnapsToDevicePixels="True"
+                                               HorizontalAlignment="Center" />
+
+                                        <TextBlock x:Name="OptimisingMessageText"
+                                                   Margin="0,18,0,0"
+                                                   FontSize="20"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" />
+
+                                        <TextBlock x:Name="OptimisingProgressText"
+                                                   Margin="0,8,0,0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <WrapPanel Grid.Row="2"
+                                   Margin="0,13,0,0">
+                            <Button x:Name="ExportAllButton"
+                                    Style="{StaticResource AccentOutlineButtonStyle}"
+                                    Margin="0,0,9,0"
+                                    IsEnabled="False"
+                                    Click="ExportAll_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72D;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Export all successful…" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="ExportSelectedButton"
+                                    Style="{StaticResource AccentOutlineButtonStyle}"
+                                    IsEnabled="False"
+                                    Click="ExportSelected_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72D;"
+                                               Style="{StaticResource IconTextStyle}"
+                                               Margin="0,0,9,0" />
+                                    <TextBlock Text="Export selected…" />
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Column="2"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="0,0,0,14">
+                                        <TextBlock Text="&#xE744;"
+                                                   Style="{StaticResource IconTextStyle}"
+                                                   FontSize="19"
+                                                   Margin="0,0,10,0" />
+                                        <TextBlock Text="Image Size Presets"
+                                                   Style="{StaticResource SectionTitleStyle}" />
+                                    </StackPanel>
+
+                                    <Label Content="Size preset"
+                                           Target="{Binding ElementName=PresetPicker}"
+                                           Padding="0,0,0,6" />
+                                    <ComboBox x:Name="PresetPicker"
+                                              ItemsSource="{Binding Presets}"
+                                              SelectedItem="{Binding SelectedPreset}"
+                                              DisplayMemberPath="Name" />
+                                    <TextBlock Text="{Binding PresetDimensions}"
+                                               Margin="0,13,0,4"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+
+                                    <Label Content="Resize mode"
+                                           Padding="0,13,0,6" />
+                                    <ComboBox ItemsSource="{Binding ResizeModes}"
+                                              SelectedItem="{Binding SelectedResizeMode}"
+                                              DisplayMemberPath="Name" />
+
+                                    <CheckBox Content="Allow upscaling"
+                                              IsChecked="{Binding AllowUpscaling}"
+                                              Margin="0,14,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardStyle}"
+                                    Margin="0,14,0,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="0,0,0,14">
+                                        <TextBlock Text="&#xE9E9;"
+                                                   Style="{StaticResource IconTextStyle}"
+                                                   FontSize="19"
+                                                   Margin="0,0,10,0" />
+                                        <TextBlock Text="Output Settings"
+                                                   Style="{StaticResource SectionTitleStyle}" />
+                                    </StackPanel>
+
+                                    <Label Content="Output format"
+                                           Padding="0,0,0,6" />
+                                    <ComboBox ItemsSource="{Binding OutputFormats}"
+                                              SelectedItem="{Binding SelectedOutputFormat}" />
+
+                                    <Label Content="Maximum file size (KB)"
+                                           Padding="0,13,0,6" />
+                                    <TextBox Text="{Binding TargetSizeKilobytesText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <Label Content="Minimum WebP quality (1–100)"
+                                           Padding="0,13,0,6" />
+                                    <TextBox Text="{Binding MinimumWebPQualityText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <CheckBox Content="Reduce dimensions further if required"
+                                              IsChecked="{Binding AllowFurtherDimensionReduction}"
+                                              Margin="0,14,0,0" />
+
+                                    <TextBlock Text="PNG uses lossless encoding."
+                                               Margin="0,14,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+
+                                    <TextBlock Text="Apply these settings to each selected group before optimising."
+                                               Margin="0,10,0,14"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+
+                                    <Button x:Name="ApplySelectionButton"
+                                            Style="{StaticResource AccentOutlineButtonStyle}"
+                                            HorizontalContentAlignment="Center"
+                                            IsEnabled="False"
+                                            Click="ApplyToSelection_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE930;"
+                                                       Style="{StaticResource IconTextStyle}"
+                                                       Margin="0,0,9,0" />
+                                            <TextBlock Text="Apply to selection" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <Grid Grid.Row="2"
+                      Margin="2,16,2,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="18" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="18" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding ImageCountText}"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource MutedTextStyle}" />
+
+                    <ProgressBar x:Name="OverallProgressBar"
+                                 Grid.Column="2"
+                                 Minimum="0"
+                                 Maximum="1"
+                                 Value="0"
+                                 VerticalAlignment="Center" />
+
+                    <StackPanel Grid.Column="4"
+                                Orientation="Horizontal">
+                        <Button x:Name="OptimiseButton"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,9,0"
+                                IsEnabled="False"
+                                Click="Optimise_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE768;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                           FontSize="16"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="Optimise selected" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button IsEnabled="False">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE711;"
+                                           Style="{StaticResource IconTextStyle}"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="Cancel" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Border x:Name="SettingsPage"
+                        Grid.Row="1"
+                        Grid.RowSpan="2"
+                        Visibility="Collapsed"
+                        Background="{DynamicResource WindowBackgroundBrush}"
+                        CornerRadius="10"
+                        AutomationProperties.Name="Settings page">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Width="860"
+                                    HorizontalAlignment="Center"
+                                    Margin="20,4,20,24">
+                            <Grid Margin="0,0,0,18">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Settings"
+                                               FontSize="28"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Personalise the app and choose your image defaults."
+                                               Margin="0,6,20,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource AccentOutlineButtonStyle}"
+                                        Click="BackToOptimiser_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE72B;"
+                                                   Style="{StaticResource IconTextStyle}"
+                                                   Margin="0,0,8,0" />
+                                        <TextBlock Text="Back to optimiser" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="App appearance" Style="{StaticResource SectionTitleStyle}" />
+                                    <Label Content="Colour theme" Padding="0,14,0,6" />
+                                    <ComboBox ItemsSource="{Binding Themes}"
+                                              SelectedItem="{Binding SelectedTheme}" />
+                                    <CheckBox Content="Enable interface animations"
+                                              IsChecked="{Binding InterfaceAnimationsEnabled}"
+                                              Margin="0,18,0,0" />
+                                    <TextBlock Text="Disables all animations."
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Output defaults"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock Text="These values are used the next time you apply settings to a selection."
+                                               Margin="0,5,0,14"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="18" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <Label Content="Default output format"
+                                                   Padding="0,0,0,6" />
+                                            <ComboBox ItemsSource="{Binding OutputFormats}"
+                                                      SelectedItem="{Binding SelectedOutputFormat}" />
+
+                                            <Label Content="Maximum file size (KB)"
+                                                   Padding="0,13,0,6" />
+                                            <TextBox Text="{Binding TargetSizeKilobytesText, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+                                            <Label Content="Minimum WebP quality (1–100)"
+                                                   Padding="0,0,0,6" />
+                                            <TextBox Text="{Binding MinimumWebPQualityText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <CheckBox Content="Reduce dimensions further if required"
+                                                      IsChecked="{Binding AllowFurtherDimensionReduction}"
+                                                      Margin="0,18,0,0" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardStyle}"
+                                    Margin="0,14,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Resize defaults"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock Text="Choose how images are placed within their selected dimensions."
+                                               Margin="0,5,0,14"
+                                               Style="{StaticResource MutedTextStyle}" />
+
+                                    <Label Content="Default size preset" Padding="0,0,0,6" />
+                                    <ComboBox ItemsSource="{Binding Presets}"
+                                              SelectedItem="{Binding SelectedPreset}"
+                                              DisplayMemberPath="Name" Margin="0,0,0,13" />
+
+                                    <Label Content="Resize mode"
+                                           Padding="0,0,0,6" />
+                                    <ComboBox ItemsSource="{Binding ResizeModes}"
+                                              SelectedItem="{Binding SelectedResizeMode}"
+                                              DisplayMemberPath="Name" />
+
+                                    <CheckBox Content="Allow upscaling"
+                                              IsChecked="{Binding AllowUpscaling}"
+                                              Margin="0,16,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Margin="0,18,0,0">
+                                <WrapPanel>
+                                    <Button Content="Save settings"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Click="SaveSettings_Click"
+                                            Margin="0,0,12,8" />
+                                    <Button Content="Reset to defaults"
+                                            Click="ResetSettings_Click"
+                                            Margin="0,0,0,8" />
+                                </WrapPanel>
+                                <TextBlock x:Name="SettingsFeedbackText"
+                                           Margin="2,6,2,0"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           TextWrapping="Wrap"
+                                           AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <Border x:Name="HelpPage"
+                        Grid.Row="1"
+                        Grid.RowSpan="2"
+                        Visibility="Collapsed"
+                        Background="{DynamicResource WindowBackgroundBrush}"
+                        CornerRadius="10"
+                        AutomationProperties.Name="Help page">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel MaxWidth="860"
+                                    HorizontalAlignment="Center"
+                                    Margin="20,4,20,24">
+                            <Grid Margin="0,0,0,18">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Help"
+                                               FontSize="28"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="A quick guide to preparing website images."
+                                               Margin="0,6,20,0"
+                                               Style="{StaticResource MutedTextStyle}" />
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource AccentOutlineButtonStyle}"
+                                        Click="BackToOptimiser_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE72B;"
+                                                   Style="{StaticResource IconTextStyle}"
+                                                   Margin="0,0,8,0" />
+                                        <TextBlock Text="Back to optimiser" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Optimise images in five steps"
+                                               Style="{StaticResource SectionTitleStyle}" />
+
+                                    <TextBlock Margin="0,14,0,0" TextWrapping="Wrap">
+                                        <Run Text="1. Import: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="Add JPEG, PNG or WebP images individually, or import an entire folder." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="2. Select: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="Select one or more image cards. Different selections can receive different settings." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="3. Configure: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="Choose a size preset, resize mode and output settings, then click" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Apply to selection" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text="." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="4. Optimise: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The app resizes each selected image and automatically finds the best WebP quality for its file-size target." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="5. Export: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="Choose" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Export all successful…" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text="or" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Export selected…" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text=". Originals are preserved." />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel>
+                                <TextBlock Text="Image Size Presets"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Margin="0,18,0,0" />
+                            </StackPanel>
+
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Fit within dimensions"
+                                                   Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Text="Keeps the whole image visible and places it inside the selected width and height without stretching or cropping."
+                                                   Margin="0,8,0,0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Crop to fill"
+                                                   Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Text="Fills the selected dimensions by cropping excess content evenly from the centre."
+                                                   Margin="0,8,0,0"
+                                                   Style="{StaticResource MutedTextStyle}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Border Style="{StaticResource CardStyle}"
+                                    Margin="0,14,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Allow upscaling"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock Text="Allows an image smaller than the selected preset to be enlarged. This can help produce exact preset dimensions, especially with crop to fill, but can also expose compression artefacts. Leave this disabled when preserving the source image’s original detail is more important."
+                                               Margin="0,8,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel>
+                                <TextBlock Text="Output Settings"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Margin="0,18,0,0" />
+                            </StackPanel>
+
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                       Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="File-size targets"
+                                                  Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Text="WebP uses the highest quality that meets the target without going below the configured minimum quality. PNG is lossless, so quality controls do not apply. If a target cannot be met, the image is clearly marked."
+                                                  Margin="0,8,0,0"
+                                                  Style="{StaticResource MutedTextStyle}"
+                                                  TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2"
+                                       Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Reduce dimensions further if required"
+                                                  Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Text="Allows the optimiser to reduce image dimensions further when compression alone cannot meet the file-size target. Enable this if smaller dimensions are acceptable. The minimum WebP quality is still respected, and very small targets may remain out of reach."
+                                                  Margin="0,8,0,0"
+                                                  Style="{StaticResource MutedTextStyle}"
+                                                  TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel>
+                                <TextBlock Text="Selecting and Preparing Images"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Margin="0,18,0,0" />
+                            </StackPanel>
+
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                       Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Selecting images"
+                                                  Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                  Style="{StaticResource MutedTextStyle}"
+                                                  TextWrapping="Wrap">
+                                            <Run Text="After importing your images, click a card to select it. Hold Ctrl while clicking to select multiple cards, or Shift to select a range. You can also use each card’s checkbox to add or remove it from the selection. Click" />
+                                            <InlineUIContainer BaselineAlignment="Center">
+                                                <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                    <TextBlock Text="Select all" />
+                                                </Border>
+                                            </InlineUIContainer>
+                                            <Run Text="to select the whole batch, or" />
+                                            <InlineUIContainer BaselineAlignment="Center">
+                                                <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                    <TextBlock Text="Remove selected" />
+                                                </Border>
+                                            </InlineUIContainer>
+                                            <Run Text="to remove selected images from the batch. Their original files are not deleted." />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2"
+                                       Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Applying optimisation settings"
+                                                  Style="{StaticResource SectionTitleStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                  Style="{StaticResource MutedTextStyle}"
+                                                  TextWrapping="Wrap">
+                                            <Run Text="With your images selected, choose the required options in the Image Size Presets and Output Settings panels on the right. Click" />
+                                            <InlineUIContainer BaselineAlignment="Center">
+                                                <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                    <TextBlock Text="Apply to selection" />
+                                                </Border>
+                                            </InlineUIContainer>
+                                            <Run Text="to assign those settings. Check the Planned section on each card to confirm the output format, dimensions and file-size target. Repeat for other groups if they need different settings. Changing the controls alone does not update settings already assigned to a card." />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel>
+                                <TextBlock Text="Exporting"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Margin="0,18,0,0" />
+                            </StackPanel>
+
+                            <Border Style="{StaticResource CardStyle}"
+                                    Margin="0,14,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Exporting images"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock Margin="0,8,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap">
+                                        <Run Text="After applying your settings, click" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Optimise selected" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text="and wait for processing to finish. Review the Result section on each card before exporting." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,10,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap">
+                                        <Run Text="Click" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Export all successful…" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text="to save every available result, or select the cards you want and click" />
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource HelpButtonReferenceStyle}">
+                                                <TextBlock Text="Export selected…" />
+                                            </Border>
+                                        </InlineUIContainer>
+                                        <Run Text="to save only their results. Choose a destination folder when prompted. Images without a successful optimisation result are skipped; results marked Target missed can still be exported." />
+                                    </TextBlock>
+                                    <TextBlock Text="Original files remain untouched. Exports use names such as photo-optimised.webp, with a numbered suffix if that name already exists. The exported filename appears on the card after saving; a dash means it has not been exported yet."
+                                               Margin="0,10,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+
+                            <StackPanel>
+                                <TextBlock Text="Image Status"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Margin="0,18,0,0" />
+                            </StackPanel>
+
+                            <Border Style="{StaticResource CardStyle}" Margin="0,14,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Status meanings"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock Text="Each image’s current status appears in the pill at the top-right of its card."
+                                               Margin="0,8,0,0"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               TextWrapping="Wrap" />
+
+                                    <TextBlock Margin="0,14,0,0" TextWrapping="Wrap">
+                                        <Run Text="Ready: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The image is waiting to be processed. Make sure settings have been applied before optimising." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Processing: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The image is currently being optimised." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Complete: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The image has been optimised and meets its file-size target. It is ready to export." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Target missed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The image has been optimised but exceeds its file-size target. You can still export it, or adjust its settings and optimise again." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Exported: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The result has been saved to your chosen folder." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Failed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The image could not be processed. Hover over the status pill to see the error details." />
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
+                                        <Run Text="Export failed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                        <Run Text="The result could not be saved. Hover over the status pill for details, then try exporting again, choosing another folder if needed." />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
         </Grid>
-    </DockPanel>
+    </Border>
 </Window>

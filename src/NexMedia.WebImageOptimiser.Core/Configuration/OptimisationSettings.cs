@@ -1,12 +1,7 @@
 namespace NexMedia.WebImageOptimiser.Core.Configuration;
 
-/// <summary>
-/// An immutable settings snapshot, ready to assign to an image or group.
-/// These are configuration values; image processing is introduced in later milestones.
-/// </summary>
 public sealed record OptimisationSettings
 {
-    // KB is decimal throughout the app: 200 KB = 200,000 bytes.
     public const long DefaultTargetSizeBytes = 200_000;
 
     public OptimisationSettings(
@@ -15,7 +10,8 @@ public sealed record OptimisationSettings
         ResizeMode resizeMode = ResizeMode.FitWithin,
         long targetSizeBytes = DefaultTargetSizeBytes,
         int minimumWebPQuality = 60,
-        bool allowFurtherDimensionReduction = false)
+        bool allowFurtherDimensionReduction = false,
+        bool allowUpscaling = false)
     {
         ArgumentNullException.ThrowIfNull(bounds);
 
@@ -44,13 +40,14 @@ public sealed record OptimisationSettings
         TargetSizeBytes = targetSizeBytes;
         MinimumWebPQuality = minimumWebPQuality;
         AllowFurtherDimensionReduction = allowFurtherDimensionReduction;
+        AllowUpscaling = allowUpscaling;
     }
 
     public ResizeBounds Bounds { get; }
     public RasterOutputFormat OutputFormat { get; }
     public ResizeMode ResizeMode { get; }
     public long TargetSizeBytes { get; }
-    /// <summary>Applies only to lossy WebP, never PNG or SVG.</summary>
     public int MinimumWebPQuality { get; }
     public bool AllowFurtherDimensionReduction { get; }
+    public bool AllowUpscaling { get; }
 }

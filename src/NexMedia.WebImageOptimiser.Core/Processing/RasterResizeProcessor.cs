@@ -22,7 +22,14 @@ public static class RasterResizeProcessor
             ?? throw new InvalidOperationException(
                 "Resize settings must be applied before processing the image.");
 
-        return Resize(item, dimensions);
+        ImageResizeMode mode =
+            item.ResizeSettings?.Mode
+            ?? ImageResizeMode.Fit;
+
+        return Resize(
+            item,
+            dimensions,
+            mode);
     }
 
     public static SKBitmap Resize(ImageBatchItem item, ResizeSettings settings)
@@ -33,21 +40,19 @@ public static class RasterResizeProcessor
         ResizeDimensions dimensions =
             ResizeCalculator.Calculate(item.Width, item.Height, settings);
 
-        return Resize(item, dimensions);
+        return Resize(
+            item,
+            dimensions,
+            settings.Mode);
     }
 
     internal static SKBitmap Resize(
         ImageBatchItem item,
-        ResizeDimensions dimensions)
+        ResizeDimensions dimensions,
+        ImageResizeMode resizeSettingsMode = ImageResizeMode.Fit)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(dimensions);
-
-        if (item.Format == ImageFileFormat.Svg)
-        {
-            throw new InvalidOperationException(
-                "SVG files must use the vector-preserving pipeline.");
-        }
 
         if (dimensions.Width <= 0 || dimensions.Height <= 0)
         {
@@ -66,7 +71,10 @@ public static class RasterResizeProcessor
                 decoded,
                 origin);
 
-        return ResizeBitmap(oriented, dimensions);
+        return ResizeBitmap(
+            oriented,
+            dimensions,
+            resizeSettingsMode);
     }
 
     private static SKBitmap Decode(
@@ -223,7 +231,8 @@ public static class RasterResizeProcessor
 
     private static SKBitmap ResizeBitmap(
         SKBitmap source,
-        ResizeDimensions dimensions)
+        ResizeDimensions dimensions,
+        ImageResizeMode mode)
     {
         var output = new SKBitmap(
             dimensions.Width,
@@ -243,11 +252,66 @@ public static class RasterResizeProcessor
             dimensions.Width,
             dimensions.Height);
 
-        canvas.DrawImage(
-            image,
-            destination,
-            ResizeSampling);
+        if (mode == ImageResizeMode.Crop)
+        {
+            SKRect sourceRectangle =
+                CalculateCenteredCrop(
+                    source.Width,
+                    source.Height,
+                    dimensions.Width,
+                    dimensions.Height);
+
+            canvas.DrawImage(
+                image,
+                sourceRectangle,
+                destination,
+                ResizeSampling);
+        }
+        else
+        {
+            canvas.DrawImage(
+                image,
+                destination,
+                ResizeSampling);
+        }
 
         return output;
+    }
+
+    private static SKRect CalculateCenteredCrop(
+        int sourceWidth,
+        int sourceHeight,
+        int outputWidth,
+        int outputHeight)
+    {
+        double sourceAspect =
+            (double)sourceWidth / sourceHeight;
+        double outputAspect =
+            (double)outputWidth / outputHeight;
+
+        if (sourceAspect > outputAspect)
+        {
+            float cropWidth =
+                (float)(sourceHeight * outputAspect);
+            float left =
+                (sourceWidth - cropWidth) / 2f;
+
+            return new SKRect(
+                left,
+                0,
+                left + cropWidth,
+                sourceHeight);
+        }
+
+        float cropHeight =
+            (float)(sourceWidth / outputAspect);
+        float top =
+            (sourceHeight - cropHeight) / 2f;
+
+        return new SKRect(
+            0,
+            top,
+            sourceWidth,
+            top + cropHeight);
     }
 }

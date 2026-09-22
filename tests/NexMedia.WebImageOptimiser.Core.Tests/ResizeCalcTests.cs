@@ -134,7 +134,7 @@ public class ResizeCalculatorTests
     }
 
     [TestMethod]
-    public void Calculate_CropMode_ThrowsUntilImplemented()
+    public void Calculate_CropMode_UsesRequestedAspectRatio()
     {
         var settings = new ResizeSettings
         {
@@ -142,10 +142,52 @@ public class ResizeCalculatorTests
             Mode = ImageResizeMode.Crop
         };
 
-        Assert.ThrowsExactly<NotSupportedException>(
-            () => ResizeCalculator.Calculate(
+        ResizeDimensions result =
+            ResizeCalculator.Calculate(
                 4000,
                 3000,
-                settings));
+                settings);
+
+        Assert.AreEqual(1920, result.Width);
+        Assert.AreEqual(1080, result.Height);
+    }
+
+    [TestMethod]
+    public void Calculate_CropMode_DoesNotUpscaleByDefault()
+    {
+        var settings = new ResizeSettings
+        {
+            Bounds = new ResizeBounds(1920, 1080),
+            Mode = ImageResizeMode.Crop
+        };
+
+        ResizeDimensions result =
+            ResizeCalculator.Calculate(
+                640,
+                480,
+                settings);
+
+        Assert.AreEqual(640, result.Width);
+        Assert.AreEqual(360, result.Height);
+    }
+
+    [TestMethod]
+    public void Calculate_CropMode_CanUpscaleWhenEnabled()
+    {
+        var settings = new ResizeSettings
+        {
+            Bounds = new ResizeBounds(1920, 1080),
+            Mode = ImageResizeMode.Crop,
+            AllowUpscaling = true
+        };
+
+        ResizeDimensions result =
+            ResizeCalculator.Calculate(
+                640,
+                480,
+                settings);
+
+        Assert.AreEqual(1920, result.Width);
+        Assert.AreEqual(1080, result.Height);
     }
 }

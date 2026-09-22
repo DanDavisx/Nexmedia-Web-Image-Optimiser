@@ -13,8 +13,7 @@ public static class ImageImportService
             ".jpg",
             ".jpeg",
             ".png",
-            ".webp",
-            ".svg"
+            ".webp"
         };
 
     public static ImageImportResult ImportFiles(
@@ -90,9 +89,8 @@ public static class ImageImportService
 
             try
             {
-                ImageEntry entry = IsSvg(fullPath)
-                    ? SvgMetadataReader.Read(fullPath)
-                    : RasterMetadataReader.Read(fullPath);
+                ImageEntry entry =
+                    RasterMetadataReader.Read(fullPath);
 
                 importedImages.Add(entry);
             }
@@ -155,13 +153,5 @@ public static class ImageImportService
         string extension = Path.GetExtension(filePath);
 
         return SupportedExtensions.Contains(extension);
-    }
-
-    private static bool IsSvg(string filePath)
-    {
-        return string.Equals(
-            Path.GetExtension(filePath),
-            ".svg",
-            StringComparison.OrdinalIgnoreCase);
     }
 }

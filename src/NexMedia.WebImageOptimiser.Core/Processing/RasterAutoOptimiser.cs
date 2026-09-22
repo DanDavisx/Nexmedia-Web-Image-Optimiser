@@ -21,6 +21,7 @@ public static class RasterAutoOptimiser
         var resizeSettings = new ResizeSettings
         {
             Bounds = settings.Bounds,
+            AllowUpscaling = settings.AllowUpscaling,
             Mode = settings.ResizeMode switch
             {
                 ResizeMode.FitWithin =>
@@ -72,7 +73,10 @@ public static class RasterAutoOptimiser
             using SKBitmap bitmap =
                 RasterResizeProcessor.Resize(
                     item,
-                    dimensions);
+                    dimensions,
+                    resizeSettingsMode: settings.ResizeMode == ResizeMode.CropToFill
+                        ? ImageResizeMode.Crop
+                        : ImageResizeMode.Fit);
 
             (
                 RasterEncodeResult encoded,
@@ -205,7 +209,10 @@ public static class RasterAutoOptimiser
             using SKBitmap bitmap =
                 RasterResizeProcessor.Resize(
                     item,
-                    dimensions);
+                    dimensions,
+                    resizeSettingsMode: settings.ResizeMode == ResizeMode.CropToFill
+                        ? ImageResizeMode.Crop
+                        : ImageResizeMode.Fit);
 
             RasterEncodeResult encoded =
                 RasterEncoder.Encode(

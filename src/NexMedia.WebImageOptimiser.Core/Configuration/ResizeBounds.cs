@@ -1,6 +1,6 @@
 namespace NexMedia.WebImageOptimiser.Core.Configuration;
 
-/// <summary>Pixel limits. A null axis is unconstrained, as in a maximum-width preset.</summary>
+//Pixel limits for resizing.
 public sealed record ResizeBounds
 {
     public ResizeBounds(int? width, int? height)

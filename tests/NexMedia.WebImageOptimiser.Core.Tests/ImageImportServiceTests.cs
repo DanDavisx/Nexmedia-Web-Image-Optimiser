@@ -48,14 +48,12 @@ public class ImageImportServiceTests
             "banner.webp",
             SKEncodedImageFormat.Webp);
 
-        string svg = CreateSvg("logo.svg");
-
         ImageImportResult result =
             ImageImportService.ImportFiles(
-                [jpeg, png, webp, svg]);
+                [jpeg, png, webp]);
 
         Assert.AreEqual(
-            4,
+            3,
             result.ImportedImages.Count);
 
         Assert.AreEqual(
@@ -151,10 +149,11 @@ public class ImageImportServiceTests
         Directory.CreateDirectory(
             nestedDirectory);
 
-        CreateSvg(
+        CreateRaster(
             Path.Combine(
                 "Nested",
-                "logo.svg"));
+                "banner.webp"),
+            SKEncodedImageFormat.Webp);
 
         File.WriteAllText(
             Path.Combine(
@@ -211,31 +210,4 @@ public class ImageImportServiceTests
         return filePath;
     }
 
-    private string CreateSvg(string fileName)
-    {
-        string filePath =
-            Path.Combine(
-                _testDirectory,
-                fileName);
-
-        string? directory =
-            Path.GetDirectoryName(filePath);
-
-        if (directory is not null)
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        File.WriteAllText(
-            filePath,
-            """
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="800"
-                 height="600"
-                 viewBox="0 0 800 600">
-            </svg>
-            """);
-
-        return filePath;
-    }
 }

@@ -25,36 +25,14 @@ public static class ResizeCalculator
 
         if (settings.Mode == ImageResizeMode.Crop)
         {
-            throw new NotSupportedException(
-                "Crop resizing has not been implemented yet.");
+            return CalculateCropDimensions(
+                originalWidth,
+                originalHeight,
+                settings);
         }
 
         int? targetWidth = settings.Bounds.Width;
         int? targetHeight = settings.Bounds.Height;
-
-        if (!settings.PreserveAspectRatio)
-        {
-            int width = targetWidth
-                ?? (int)Math.Round(originalWidth);
-
-            int height = targetHeight
-                ?? (int)Math.Round(originalHeight);
-
-            if (!settings.AllowUpscaling)
-            {
-                width = Math.Min(
-                    width,
-                    (int)Math.Round(originalWidth));
-
-                height = Math.Min(
-                    height,
-                    (int)Math.Round(originalHeight));
-            }
-
-            return new ResizeDimensions(
-                Math.Max(1, width),
-                Math.Max(1, height));
-        }
 
         double widthScale =
             targetWidth.HasValue
@@ -87,5 +65,35 @@ public static class ResizeCalculator
         return new ResizeDimensions(
             calculatedWidth,
             calculatedHeight);
+    }
+
+    private static ResizeDimensions CalculateCropDimensions(
+        double originalWidth,
+        double originalHeight,
+        ResizeSettings settings)
+    {
+        if (settings.Bounds.Width is not int targetWidth ||
+            settings.Bounds.Height is not int targetHeight)
+        {
+            throw new ArgumentException(
+                "Crop to fill requires both dimensions.",
+                nameof(settings));
+        }
+
+        double outputScale = settings.AllowUpscaling
+            ? 1d
+            : Math.Min(
+                1d,
+                Math.Min(
+                    originalWidth / targetWidth,
+                    originalHeight / targetHeight));
+
+        return new ResizeDimensions(
+            Math.Max(
+                1,
+                (int)Math.Round(targetWidth * outputScale)),
+            Math.Max(
+                1,
+                (int)Math.Round(targetHeight * outputScale)));
     }
 }

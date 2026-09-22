@@ -63,6 +63,7 @@ public sealed class SettingsValidationTests
 
         Assert.AreEqual(ResizeMode.FitWithin, settings.ResizeMode);
         Assert.IsFalse(settings.AllowFurtherDimensionReduction);
+        Assert.IsFalse(settings.AllowUpscaling);
         Assert.AreEqual(RasterOutputFormat.WebP, settings.OutputFormat);
         Assert.AreEqual(200_000L, settings.TargetSizeBytes);
     }

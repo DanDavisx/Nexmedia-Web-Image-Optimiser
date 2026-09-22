@@ -8,8 +8,6 @@ public sealed record ResizeSettings
 {
     public required ResizeBounds Bounds { get; init; }
 
-    public bool PreserveAspectRatio { get; init; } = true;
-
     public bool AllowUpscaling { get; init; } = false;
 
     public ImageResizeMode Mode { get; init; } = ImageResizeMode.Fit;

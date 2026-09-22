@@ -6,6 +6,5 @@ public enum ImageFileFormat
 {
     Jpeg,
     Png,
-    WebP,
-    Svg
+    WebP
 }

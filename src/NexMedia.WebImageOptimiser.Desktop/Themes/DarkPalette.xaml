@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="WindowBackgroundColor">#191919</Color>
+    <Color x:Key="TitleBarColor">#151515</Color>
+    <Color x:Key="SurfaceColor">#222222</Color>
+    <Color x:Key="RaisedSurfaceColor">#2B2B2B</Color>
+    <Color x:Key="HoverSurfaceColor">#353535</Color>
+    <Color x:Key="BorderColor">#424242</Color>
+
+    <Color x:Key="PrimaryTextColor">#F3F3F3</Color>
+    <Color x:Key="MutedTextColor">#B8B8B8</Color>
+    <Color x:Key="DisabledColor">#7F7F7F</Color>
+
+    <Color x:Key="AccentColor">#FF7551</Color>
+    <Color x:Key="AccentHoverColor">#FF8C6B</Color>
+    <Color x:Key="AccentPressedColor">#E95E3F</Color>
+
+    <Color x:Key="SelectionColor">#402A19</Color>
+
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="TitleBarBrush" Color="{StaticResource TitleBarColor}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="RaisedSurfaceBrush" Color="{StaticResource RaisedSurfaceColor}" />
+    <SolidColorBrush x:Key="HoverSurfaceBrush" Color="{StaticResource HoverSurfaceColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="{StaticResource AccentPressedColor}" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}" />
+    <SolidColorBrush x:Key="DisabledBrush" Color="{StaticResource DisabledColor}" />
+
+    <LinearGradientBrush x:Key="PrimaryButtonGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#FF8865" Offset="0" />
+        <GradientStop Color="#FF7551" Offset="0.5" />
+        <GradientStop Color="#FA6948" Offset="1" />
+    </LinearGradientBrush>
+</ResourceDictionary>
