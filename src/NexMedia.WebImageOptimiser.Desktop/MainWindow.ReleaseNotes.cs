@@ -38,7 +38,7 @@ public partial class MainWindow
             ReleaseNotesBody.Text = notes?.Body ?? "";
             ReleaseNotesDot.Visibility = notes?.HasNotes == true ? Visibility.Visible : Visibility.Collapsed;
             ReleaseNotesStatus.Text = notes is null
-                ? "No releases published yet. Release notes will appear here after the first release."
+                ? "No releases published yet."
                 : notes.HasNotes ? "Latest published release" : "This release does not have release notes yet.";
             ReleaseNotesNavigationButton.ToolTip = notes?.HasNotes == true
                 ? "Release notes available" : "Release notes";

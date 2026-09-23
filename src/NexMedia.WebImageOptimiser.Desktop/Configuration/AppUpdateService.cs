@@ -28,7 +28,7 @@ internal sealed class AppUpdateService
                 && DateTime.UtcNow - File.GetLastWriteTimeUtc(lastCheckPath) < TimeSpan.FromHours(6))
                 return "Updates are checked automatically every six hours when the app opens.";
 
-            // Throttle unsuccessful checks too, including when no release exists yet.
+            // Throttle unsuccessful checks
             Directory.CreateDirectory(Path.GetDirectoryName(lastCheckPath)!);
             await File.WriteAllTextAsync(lastCheckPath, DateTime.UtcNow.ToString("O"));
             var update = await manager.CheckForUpdatesAsync();

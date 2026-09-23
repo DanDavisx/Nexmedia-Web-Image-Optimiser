@@ -27,9 +27,6 @@ public partial class MainWindow
             var monitor = new MonitorInformation { Size = Marshal.SizeOf<MonitorInformation>() };
             if (GetMonitorInfo(MonitorFromWindow(handle, 2), ref monitor))
             {
-                // Borderless windows need explicit maximized bounds. Windows supplies
-                // the work area in physical pixels, excluding the taskbar on any edge.
-                // MaxPosition is relative to this monitor, not the virtual desktop.
                 MinMaxInformation bounds = Marshal.PtrToStructure<MinMaxInformation>(lParam);
                 bounds.MaxPosition.X = monitor.Work.Left - monitor.Monitor.Left;
                 bounds.MaxPosition.Y = monitor.Work.Top - monitor.Monitor.Top;
@@ -41,8 +38,6 @@ public partial class MainWindow
             return 0;
         }
 
-        // Recheck after dragging/resizing or a display configuration change.
-        // Do not clamp during a drag: that would prevent crossing monitor edges.
         if (message is 0x0232 or 0x007E)
             Dispatcher.BeginInvoke(new Action(FitCurrentDisplay));
         return 0;
@@ -51,7 +46,7 @@ public partial class MainWindow
     protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
     {
         base.OnDpiChanged(oldDpi, newDpi);
-        // Let WPF finish applying the new monitor's scale and window bounds first.
+
         Dispatcher.BeginInvoke(new Action(FitCurrentDisplay));
     }
 
