@@ -18,7 +18,7 @@ internal sealed class AppUpdateService
         try
         {
             var manager = new UpdateManager(new GithubSource(
-                "https://github.com/DanDavisx/Nexmedia-Web-Image-Optimiser", null, false));
+                "https://github.com/DanDavisx/Nexmedia-Web-Image-Optimiser", null, true)); // Temporarily set to true to enable pre releases.
             if (!manager.IsInstalled)
                 return "Automatic updates are available in the installed release build.";
             if (manager.UpdatePendingRestart is not null)
