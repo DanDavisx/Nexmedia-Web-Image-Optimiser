@@ -144,7 +144,7 @@ public partial class MainWindow : Window
         var sheet =
             new BitmapImage(
                 new Uri(
-                    "pack://application:,,,/NexMedia.WebImageOptimiser.Desktop;component/Assets/loading-spinner-sheet.png",
+                    "pack://application:,,,/Assets/loading-spinner-sheet.png",
                     UriKind.Absolute));
         sheet.Freeze();
 
