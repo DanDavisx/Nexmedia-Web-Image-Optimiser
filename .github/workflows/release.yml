@@ -1,0 +1,58 @@
+name: Prepare Windows release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate version tag
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if ($env:RELEASE_TAG -notmatch '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
+            throw 'Use a stable version tag such as v0.1.0. Prereleases are not configured.'
+          }
+          "RELEASE_VERSION=$($env:RELEASE_TAG.Substring(1))" >> $env:GITHUB_ENV
+      - name: Test
+        run: dotnet test tests/NexMedia.WebImageOptimiser.Core.Tests/NexMedia.WebImageOptimiser.Core.Tests.csproj -c Release
+      - name: Publish application
+        run: dotnet publish src/NexMedia.WebImageOptimiser.Desktop/NexMedia.WebImageOptimiser.Desktop.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ env.RELEASE_VERSION }} -o artifacts/publish
+      - name: Install packaging tool
+        run: dotnet tool install --tool-path artifacts/tools vpk --version 1.2.158
+      - name: Package installer and updates
+        run: >-
+          artifacts/tools/vpk.exe pack
+          --packId NexMedia.WebImageOptimiser
+          --packVersion ${{ env.RELEASE_VERSION }}
+          --packDir artifacts/publish
+          --mainExe NexMedia.WebImageOptimiser.Desktop.exe
+          --packTitle "NexMedia Web Image Optimiser"
+          --runtime win-x64
+          --channel win
+          --icon src/NexMedia.WebImageOptimiser.Desktop/Assets/Nexmedia-app-icon.ico
+          --outputDir artifacts/releases
+      - name: Create draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: pwsh
+        run: |
+          $assets = Get-ChildItem -LiteralPath artifacts/releases -File | ForEach-Object { $_.FullName }
+          gh release create $env:RELEASE_TAG @assets --verify-tag --draft --title "NexMedia Web Image Optimiser $env:RELEASE_VERSION" --notes-file docs/changelog.md
+          if ($LASTEXITCODE -ne 0) { throw 'Draft release creation failed.' }

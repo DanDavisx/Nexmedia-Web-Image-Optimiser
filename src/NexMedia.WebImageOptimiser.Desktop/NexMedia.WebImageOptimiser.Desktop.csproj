@@ -3,6 +3,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <StartupObject>NexMedia.WebImageOptimiser.Desktop.Program</StartupObject>
+    <Version>0.1.0-dev</Version>
      <ApplicationIcon>Assets\Nexmedia-app-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
@@ -25,5 +27,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="1.2.158" />
   </ItemGroup>
 </Project>

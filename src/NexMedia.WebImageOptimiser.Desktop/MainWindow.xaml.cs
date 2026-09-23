@@ -63,6 +63,8 @@ public partial class MainWindow : Window
         AppearanceManager.ApplyTheme(preferences.Theme);
         AppearanceManager.ApplyAnimations(preferences.InterfaceAnimationsEnabled);
         InitializeComponent();
+        Loaded += async (_, _) => await CheckForUpdatesAsync(manual: false);
+        Loaded += async (_, _) => await LoadReleaseNotesAsync();
 
         var viewModel = new MainWindowViewModel();
         viewModel.LoadPreferences(preferences);
@@ -112,7 +114,7 @@ public partial class MainWindow : Window
             return;
         }
         if (SavePreferences(preferences))
-            SettingsFeedbackText.Text = "Settings saved. They will be restored the next time you open the app.";
+            SettingsFeedbackText.Text = "Settings saved.";
     }
 
     private void ResetSettings_Click(object sender, RoutedEventArgs e)
@@ -603,6 +605,8 @@ public partial class MainWindow : Window
             : Visibility.Collapsed;
         HelpPage.Visibility = Visibility.Collapsed;
         HelpNavigationButton.IsChecked = false;
+        ReleaseNotesPage.Visibility = Visibility.Collapsed;
+        ReleaseNotesNavigationButton.IsChecked = false;
         MainHeaderCopy.Visibility = showSettings
             ? Visibility.Collapsed
             : Visibility.Visible;
@@ -623,6 +627,8 @@ public partial class MainWindow : Window
         MainHeaderCopy.Visibility = showHelp
             ? Visibility.Collapsed
             : Visibility.Visible;
+        ReleaseNotesPage.Visibility = Visibility.Collapsed;
+        ReleaseNotesNavigationButton.IsChecked = false;
     }
 
     private void BackToOptimiser_Click(
@@ -634,6 +640,8 @@ public partial class MainWindow : Window
         SettingsNavigationButton.IsChecked = false;
         HelpNavigationButton.IsChecked = false;
         MainHeaderCopy.Visibility = Visibility.Visible;
+        ReleaseNotesPage.Visibility = Visibility.Collapsed;
+        ReleaseNotesNavigationButton.IsChecked = false;
     }
 
     private async void ImportImages_Click(
@@ -874,6 +882,7 @@ public partial class MainWindow : Window
 
         SettingsNavigationButton.IsEnabled = !isBusy;
         HelpNavigationButton.IsEnabled = !isBusy;
+        ReleaseNotesNavigationButton.IsEnabled = !isBusy;
 
         ExportAllButton.IsEnabled =
             hasSuccessfulResults && !isBusy;

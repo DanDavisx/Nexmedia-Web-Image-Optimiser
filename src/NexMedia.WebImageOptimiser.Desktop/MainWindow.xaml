@@ -8,7 +8,7 @@
         Width="1600"
         Height="1000"
         MinWidth="1040"
-        MinHeight="680"
+        MinHeight="560"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource PrimaryTextBrush}"
         FontFamily="Segoe UI"
@@ -121,7 +121,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="1"
+            <Grid x:Name="MainContent" Grid.Row="1"
                   Margin="26,20,26,20" Grid.ColumnSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -129,7 +129,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0"
+                <Grid x:Name="HeaderArea" Grid.Row="0"
                       Margin="2,0,2,18">
 
                     <Grid Margin="-19,-2,0,2">
@@ -157,6 +157,18 @@
                                           ToolTip="Help"
                                           AutomationProperties.Name="Help"
                                           Click="HelpNavigation_Click" />
+                            <Grid Margin="6,0,0,0">
+                                <ToggleButton x:Name="ReleaseNotesNavigationButton"
+                                              Content="&#xE91C;"
+                                              Style="{StaticResource HeaderNavigationButtonStyle}"
+                                              ToolTip="Release notes"
+                                              AutomationProperties.Name="Release notes"
+                                              Click="ReleaseNotesNavigation_Click" />
+                                <Ellipse x:Name="ReleaseNotesDot" Width="8" Height="8"
+                                         Fill="{DynamicResource AccentBrush}"
+                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                         Margin="0,3,3,0" Visibility="Collapsed" IsHitTestVisible="False" />
+                            </Grid>
                         </StackPanel>
 
                         <StackPanel x:Name="MainHeaderCopy"
@@ -840,6 +852,39 @@
                     </StackPanel>
                 </Grid>
 
+                <Border x:Name="ReleaseNotesPage" Grid.Row="1" Grid.RowSpan="2"
+                        Visibility="Collapsed" Background="{DynamicResource WindowBackgroundBrush}"
+                        CornerRadius="10" AutomationProperties.Name="Release notes page">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel MaxWidth="860" Margin="20,4,20,24">
+                            <Grid Margin="0,0,0,18">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Release notes" FontSize="28" FontWeight="SemiBold" />
+                                <Button Grid.Column="1" Content="Back to optimiser"
+                                        Style="{StaticResource AccentOutlineButtonStyle}" Click="BackToOptimiser_Click" />
+                            </Grid>
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel>
+                                    <TextBlock x:Name="ReleaseNotesStatus" Text="Checking for release notes…"
+                                               TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" />
+                                    <TextBlock x:Name="ReleaseNotesTitle" FontSize="22" FontWeight="SemiBold"
+                                               TextWrapping="Wrap" Margin="0,14,0,0" />
+                                    <TextBlock x:Name="ReleaseNotesMetadata" Style="{StaticResource MutedTextStyle}"
+                                               Margin="0,6,0,12" TextWrapping="Wrap" />
+                                    <TextBox x:Name="ReleaseNotesBody" IsReadOnly="True" TextWrapping="Wrap"
+                                             BorderThickness="0" Background="Transparent" Padding="0"
+                                             VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" />
+                                    <Button x:Name="RefreshReleaseNotesButton" Content="Refresh"
+                                            HorizontalAlignment="Left" Margin="0,16,0,0" Click="RefreshReleaseNotes_Click" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
                 <Border x:Name="SettingsPage"
                         Grid.Row="1"
                         Grid.RowSpan="2"
@@ -849,8 +894,8 @@
                         AutomationProperties.Name="Settings page">
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Width="860"
-                                    HorizontalAlignment="Center"
+                        <StackPanel MaxWidth="860"
+                                    HorizontalAlignment="Stretch"
                                     Margin="20,4,20,24">
                             <Grid Margin="0,0,0,18">
                                 <Grid.ColumnDefinitions>
@@ -892,6 +937,16 @@
                                     <TextBlock Text="Disables all animations."
                                                Style="{StaticResource MutedTextStyle}"
                                                TextWrapping="Wrap" Margin="0,8,0,0" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="App updates" Style="{StaticResource SectionTitleStyle}" />
+                                    <TextBlock x:Name="UpdateStatusText" Text="Stable updates download automatically and install the next time you open the app."
+                                               TextWrapping="Wrap" Margin="0,10,0,12" />
+                                    <Button x:Name="CheckForUpdatesButton" Content="Check for updates"
+                                            HorizontalAlignment="Left" Click="CheckForUpdates_Click" />
                                 </StackPanel>
                             </Border>
 
