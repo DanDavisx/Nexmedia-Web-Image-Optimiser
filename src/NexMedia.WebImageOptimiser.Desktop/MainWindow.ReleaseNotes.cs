@@ -45,8 +45,13 @@ public partial class MainWindow
         }
         catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException or JsonException)
         {
-            ReleaseNotesStatus.Text = "Could not load release notes. Check your connection and try Refresh.";
-            // Preserve any notes and indicator already loaded during this session.
+            System.Diagnostics.Trace.TraceWarning("Release notes could not be loaded: {0}", exception);
+            ReleaseNotesStatus.Text = exception switch
+            {
+                JsonException => "The release notes response could not be read. Try Refresh later.",
+                HttpRequestException { StatusCode: not null } => "The release notes service is unavailable. Try Refresh later.",
+                _ => "Could not connect to the release notes service. Check your connection and try Refresh."
+            };
         }
         finally
         {
