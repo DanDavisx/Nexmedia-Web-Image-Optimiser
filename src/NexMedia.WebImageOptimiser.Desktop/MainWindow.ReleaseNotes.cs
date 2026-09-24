@@ -10,6 +10,10 @@ public partial class MainWindow
     private static readonly HttpClient ReleaseNotesClient = new() { Timeout = TimeSpan.FromSeconds(15) };
     private readonly GitHubReleaseNotesService releaseNotesService = new(ReleaseNotesClient);
     private bool loadingReleaseNotes;
+    private readonly ReleaseNotesReadState releaseNotesReadState = new(System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "NexMedia", "WebImageOptimiser", "viewed-release.txt"));
+    private ReleaseNotes? latestRelease;
 
     private void ReleaseNotesNavigation_Click(object sender, RoutedEventArgs e)
     {
@@ -18,10 +22,21 @@ public partial class MainWindow
         ReleaseNotesNavigationButton.IsChecked = show;
         ReleaseNotesPage.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         MainHeaderCopy.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+        UpdateReleaseNotesIndicator();
     }
 
     private async void RefreshReleaseNotes_Click(object sender, RoutedEventArgs e)
         => await LoadReleaseNotesAsync();
+
+    private void UpdateReleaseNotesIndicator()
+    {
+        if (ReleaseNotesPage.Visibility == Visibility.Visible && latestRelease is not null)
+            releaseNotesReadState.MarkViewed(latestRelease);
+
+        bool unread = releaseNotesReadState.IsUnread(latestRelease);
+        ReleaseNotesDot.Visibility = unread ? Visibility.Visible : Visibility.Collapsed;
+        ReleaseNotesNavigationButton.ToolTip = unread ? "Unread release notes available" : "Release notes";
+    }
 
     private async Task LoadReleaseNotesAsync()
     {
@@ -29,19 +44,16 @@ public partial class MainWindow
         loadingReleaseNotes = true;
         RefreshReleaseNotesButton.IsEnabled = false;
         ReleaseNotesStatus.Text = "Checking for release notes…";
+        ReleaseNotesStatus.Visibility = Visibility.Visible;
         try
         {
-            ReleaseNotes? notes = await releaseNotesService.GetLatestAsync();
-            ReleaseNotesTitle.Text = notes?.Name is { Length: > 0 } name ? name : notes?.Tag ?? "";
-            ReleaseNotesMetadata.Text = notes is null ? "" :
-                $"{notes.Tag}  {notes.PublishedAt?.ToLocalTime().ToString("d MMM yyyy")}";
-            ReleaseNotesBody.Text = notes?.Body ?? "";
-            ReleaseNotesDot.Visibility = notes?.HasNotes == true ? Visibility.Visible : Visibility.Collapsed;
-            ReleaseNotesStatus.Text = notes is null
-                ? "No releases published yet."
-                : notes.HasNotes ? "Latest published release" : "This release does not have release notes yet.";
-            ReleaseNotesNavigationButton.ToolTip = notes?.HasNotes == true
-                ? "Release notes available" : "Release notes";
+            var history = await releaseNotesService.GetHistoryAsync();
+            latestRelease = history.FirstOrDefault();
+            ReleaseNotesHistory.ItemsSource = history.Select((notes, index) =>
+                new ViewModels.ReleaseNoteCardViewModel(notes, IsLatest: index == 0)).ToArray();
+            ReleaseNotesStatus.Text = history.Count == 0 ? "No releases published yet." : "";
+            ReleaseNotesStatus.Visibility = history.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            UpdateReleaseNotesIndicator();
         }
         catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException or JsonException)
         {

@@ -1,0 +1,46 @@
+<UserControl x:Class="NexMedia.WebImageOptimiser.Desktop.Controls.ReleaseNoteCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AutomationProperties.Name="{Binding Notes.DisplayName}">
+    <Border Style="{StaticResource CardStyle}">
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Notes.DisplayName}" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <Border Grid.Column="1" Padding="9,4" CornerRadius="10" Margin="12,0,0,0"
+                        VerticalAlignment="Top" Background="#2A9A61" BorderBrush="#2A9A61" BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLatest}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="Latest release" Foreground="White" />
+                </Border>
+            </Grid>
+            <TextBlock Text="{Binding Notes.PublishedAt, StringFormat={}{0:d MMM yyyy}}"
+                       Style="{StaticResource MutedTextStyle}" Margin="0,6,0,12" />
+            <TextBox IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"
+                     Background="Transparent" Padding="0"
+                     VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="Text" Value="{Binding Notes.Body, Mode=OneWay}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Notes.HasNotes}" Value="False">
+                                <Setter Property="Text" Value="This release does not have release notes yet." />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+        </StackPanel>
+    </Border>
+</UserControl>

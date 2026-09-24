@@ -4,7 +4,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>NexMedia.WebImageOptimiser.Desktop.Program</StartupObject>
-    <Version>0.1.0-dev.3</Version>
+    <Version>0.1.0-dev.4</Version>
      <ApplicationIcon>Assets\Nexmedia-app-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

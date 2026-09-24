@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:converters="clr-namespace:NexMedia.WebImageOptimiser.Desktop.Converters"
+        xmlns:controls="clr-namespace:NexMedia.WebImageOptimiser.Desktop.Controls"
         Title="NexMedia Web Image Optimiser"
         Icon="Assets/Nexmedia-app-icon.ico"
         Width="1600"
@@ -166,8 +167,8 @@
                                               Click="ReleaseNotesNavigation_Click" />
                                 <Ellipse x:Name="ReleaseNotesDot" Width="8" Height="8"
                                          Fill="{DynamicResource AccentBrush}"
-                                         HorizontalAlignment="Right" VerticalAlignment="Top"
-                                         Margin="0,3,3,0" Visibility="Collapsed" IsHitTestVisible="False" />
+                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                         Margin="3,0,0,3" Visibility="Collapsed" IsHitTestVisible="False" />
                             </Grid>
                         </StackPanel>
 
@@ -863,24 +864,33 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Release notes" FontSize="28" FontWeight="SemiBold" />
-                                <Button Grid.Column="1" Content="Back to optimiser"
-                                        Style="{StaticResource AccentOutlineButtonStyle}" Click="BackToOptimiser_Click" />
-                            </Grid>
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel>
-                                    <TextBlock x:Name="ReleaseNotesStatus" Text="Checking for release notes…"
-                                               TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" />
-                                    <TextBlock x:Name="ReleaseNotesTitle" FontSize="22" FontWeight="SemiBold"
-                                               TextWrapping="Wrap" Margin="0,14,0,0" />
-                                    <TextBlock x:Name="ReleaseNotesMetadata" Style="{StaticResource MutedTextStyle}"
-                                               Margin="0,6,0,12" TextWrapping="Wrap" />
-                                    <TextBox x:Name="ReleaseNotesBody" IsReadOnly="True" TextWrapping="Wrap"
-                                             BorderThickness="0" Background="Transparent" Padding="0"
-                                             VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" />
-                                    <Button x:Name="RefreshReleaseNotesButton" Content="Refresh"
-                                            HorizontalAlignment="Left" Margin="0,16,0,0" Click="RefreshReleaseNotes_Click" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button x:Name="RefreshReleaseNotesButton" Margin="0,0,10,0"
+                                            Style="{StaticResource AccentOutlineButtonStyle}" Click="RefreshReleaseNotes_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE72C;" Style="{StaticResource IconTextStyle}"
+                                                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,8,0" />
+                                            <TextBlock Text="Refresh" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource AccentOutlineButtonStyle}" Click="BackToOptimiser_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE72B;" Style="{StaticResource IconTextStyle}"
+                                                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,8,0" />
+                                            <TextBlock Text="Back to optimiser" />
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
-                            </Border>
+                            </Grid>
+                            <TextBlock x:Name="ReleaseNotesStatus" Text="Checking for release notes…"
+                                       Margin="0,0,0,16" TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" />
+                            <ItemsControl x:Name="ReleaseNotesHistory" AutomationProperties.Name="Release history">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <controls:ReleaseNoteCard Margin="0,0,0,16" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </ScrollViewer>
                 </Border>
