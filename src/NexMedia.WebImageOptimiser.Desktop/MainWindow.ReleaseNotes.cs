@@ -64,7 +64,10 @@ public partial class MainWindow
             latestRelease = history.FirstOrDefault();
             releaseCards = history.Select((notes, index) =>
                 new ViewModels.ReleaseNoteCardViewModel(notes, isLatest: index == 0)).ToArray();
-            foreach (var card in releaseCards) card.Update(updateStatus);
+            if (releaseCards.Length > 0)
+            {
+                releaseCards[0].Update(updateStatus);
+            }
             ReleaseNotesHistory.ItemsSource = releaseCards;
             ReleaseNotesStatus.Text = history.Count == 0 ? "No releases published yet." : "";
             ReleaseNotesStatus.Visibility = history.Count == 0 ? Visibility.Visible : Visibility.Collapsed;

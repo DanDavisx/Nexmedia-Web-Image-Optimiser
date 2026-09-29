@@ -34,6 +34,88 @@
             <Setter Property="TextElement.Foreground" Value="#101318" />
             <Setter Property="TextElement.FontWeight" Value="SemiBold" />
         </Style>
+        <Style x:Key="StatusPillStyle"
+               TargetType="{x:Type Border}">
+            <Setter Property="Padding" Value="9,4" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource RaisedSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Complete">
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#2A9A61" />
+                    <Setter Property="BorderBrush" Value="#2A9A61" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Exported">
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#173A2A" />
+                    <Setter Property="BorderBrush" Value="#173A2A" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Processing">
+                    <Setter Property="Background" Value="#2A9A61" />
+                    <Setter Property="BorderBrush" Value="#2A9A61" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Target missed">
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#B84B55" />
+                    <Setter Property="BorderBrush" Value="#B84B55" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Ready">
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#34689A" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Failed">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#3A1C20" />
+                    <Setter Property="BorderBrush" Value="#3A1C20" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                             Value="Export failed">
+                    <Setter Property="TextElement.Foreground" Value="White" />
+                    <Setter Property="Background" Value="#3A1C20" />
+                    <Setter Property="BorderBrush" Value="#3A1C20" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="CreditFooterTemplate">
+            <StackPanel Margin="0,32,0,4"
+                HorizontalAlignment="Center">
+
+                <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+
+                    <TextBlock Text="Built and maintained by Dan Davis at"
+                       FontSize="11"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       VerticalAlignment="Center" />
+
+                    <Image Source="Assets/nexmedia-new.png"
+                       Height="18"
+                       Width="Auto"
+                       Stretch="Uniform"
+                       Margin="7,0,0,0"
+                       VerticalAlignment="Center" />
+
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
     <shell:WindowChrome.WindowChrome>
@@ -275,7 +357,7 @@
                                 ClipToBounds="True">
                             <Grid>
                                 <Grid x:Name="ImageAreaContent">
-                                <controls:ImageListBox x:Name="ImagesGrid"
+                                    <controls:ImageListBox x:Name="ImagesGrid"
                                          ItemsSource="{Binding Images}"
                                          SelectionMode="Extended"
                                          SelectionChanged="ImagesGrid_SelectionChanged"
@@ -291,77 +373,77 @@
                                          VirtualizingPanel.IsVirtualizing="True"
                                          VirtualizingPanel.VirtualizationMode="Recycling"
                                          AutomationProperties.Name="Imported images">
-                                    <ListBox.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel />
-                                        </ItemsPanelTemplate>
-                                    </ListBox.ItemsPanel>
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
 
-                                    <ListBox.ItemContainerStyle>
-                                        <Style TargetType="{x:Type ListBoxItem}">
-                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                            <Setter Property="Padding" Value="0" />
-                                            <Setter Property="Margin" Value="0,0,0,8" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                            <Setter Property="BorderThickness" Value="0" />
-                                            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusStyle}" />
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                                        <Border x:Name="ImageCard"
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ListBoxItem}">
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                <Setter Property="Padding" Value="0" />
+                                                <Setter Property="Margin" Value="0,0,0,8" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusStyle}" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                            <Border x:Name="ImageCard"
                                                                 Background="{DynamicResource SurfaceBrush}"
                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                 BorderThickness="1"
                                                                 CornerRadius="10"
                                                                 Padding="14"
                                                                 SnapsToDevicePixels="True">
-                                                            <ContentPresenter />
-                                                        </Border>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="ImageCard"
+                                                                <ContentPresenter />
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="Background"
                                                                         Value="{DynamicResource RaisedSurfaceBrush}" />
-                                                                <Setter TargetName="ImageCard"
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="BorderBrush"
                                                                         Value="{DynamicResource BorderBrush}" />
-                                                            </Trigger>
-                                                            <Trigger Property="IsSelected" Value="True">
-                                                                <Setter TargetName="ImageCard"
+                                                                </Trigger>
+                                                                <Trigger Property="IsSelected" Value="True">
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="Background"
                                                                         Value="{DynamicResource SelectionBrush}" />
-                                                                <Setter TargetName="ImageCard"
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="BorderBrush"
                                                                         Value="{DynamicResource AccentBrush}" />
-                                                                <Setter TargetName="ImageCard"
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="BorderThickness"
                                                                         Value="2" />
-                                                                <Setter TargetName="ImageCard"
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="Padding"
                                                                         Value="13" />
-                                                            </Trigger>
-                                                            <Trigger Property="IsEnabled" Value="False">
-                                                                <Setter TargetName="ImageCard"
+                                                                </Trigger>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter TargetName="ImageCard"
                                                                         Property="Opacity"
                                                                         Value="0.55" />
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </ListBox.ItemContainerStyle>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
 
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid MinHeight="108">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="26" />
-                                                    <ColumnDefinition Width="176" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid MinHeight="108">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="26" />
+                                                        <ColumnDefinition Width="176" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
 
-                                                <CheckBox Grid.Column="0"
+                                                    <CheckBox Grid.Column="0"
                                                           Margin="0,0,8,0"
                                                           HorizontalAlignment="Left"
                                                           VerticalAlignment="Center"
@@ -370,7 +452,7 @@
                                                           PreviewMouseLeftButtonDown="ImageSelectionCheckBox_PreviewMouseLeftButtonDown"
                                                           AutomationProperties.Name="{Binding FileName, StringFormat=Select {0}}" />
 
-                                                <Border Grid.Column="1"
+                                                    <Border Grid.Column="1"
                                                         Width="176"
                                                         Height="99"
                                                         Background="{DynamicResource RaisedSurfaceBrush}"
@@ -378,169 +460,166 @@
                                                         BorderThickness="1"
                                                         CornerRadius="8"
                                                         ClipToBounds="True">
-                                                    <Grid>
-                                                        <Grid.Clip>
-                                                            <RectangleGeometry Rect="0,0,174,97" RadiusX="7" RadiusY="7" />
-                                                        </Grid.Clip>
-                                                        <TextBlock Text="&#xE91B;"
+                                                        <Grid>
+                                                            <Grid.Clip>
+                                                                <RectangleGeometry Rect="0,0,174,97" RadiusX="7" RadiusY="7" />
+                                                            </Grid.Clip>
+                                                            <TextBlock Text="&#xE91B;"
                                                                    FontFamily="Segoe MDL2 Assets"
                                                                    FontSize="28"
                                                                    Foreground="{DynamicResource DisabledBrush}"
                                                                    HorizontalAlignment="Center"
                                                                    VerticalAlignment="Center" />
-                                                        <controls:ImageThumbnail Item="{Binding}" />
-                                                    </Grid>
-                                                </Border>
+                                                            <controls:ImageThumbnail Item="{Binding}" />
+                                                        </Grid>
+                                                    </Border>
 
-                                                <Grid Grid.Column="2"
+                                                    <Grid Grid.Column="2"
                                                       Margin="18,0,0,0">
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="*" />
-                                                    </Grid.RowDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="*" />
+                                                        </Grid.RowDefinitions>
 
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Text="{Binding FileName}"
+                                                            <TextBlock Text="{Binding FileName}"
                                                                    Margin="0,0,12,0"
                                                                    FontSize="17"
                                                                    FontWeight="SemiBold"
                                                                    TextTrimming="CharacterEllipsis"
                                                                    ToolTip="{Binding FilePath}" />
-
-                                                        <Border Grid.Column="1"
-                                                                Padding="9,4"
-                                                                CornerRadius="10"
+                                                            <Border Grid.Column="1"
+                                                                Style="{StaticResource StatusPillStyle}"
+                                                                Tag="{Binding Status}"
                                                                 ToolTip="{Binding ErrorMessage}">
-                                                            <Border.Style>
-                                                                <Style TargetType="{x:Type Border}">
-                                                                    <Setter Property="Background" Value="{DynamicResource RaisedSurfaceBrush}" />
-                                                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-                                                                    <Setter Property="BorderThickness" Value="1" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Complete">
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#2A9A61" />
-                                                                            <Setter Property="BorderBrush" Value="#2A9A61" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Exported">
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#173A2A" />
-                                                                            <Setter Property="BorderBrush" Value="#2A9A61" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Processing">
-                                                                            <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
-                                                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Target missed">
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#3A1C20" />
-                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Ready">
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#34689A" />
-                                                                            <Setter Property="BorderThickness" Value="0" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Failed">
-                                                                            <Setter Property="BorderThickness" Value="0" />
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#A83240" />
-                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding Status}" Value="Export failed">
-                                                                            <Setter Property="TextElement.Foreground" Value="White" />
-                                                                            <Setter Property="Background" Value="#3A1C20" />
-                                                                            <Setter Property="BorderBrush" Value="#B84B55" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Border.Style>
-                                                            <TextBlock Text="{Binding Status}"
+                                                                <TextBlock Text="{Binding Status}"
                                                                        FontSize="11"
                                                                        FontWeight="SemiBold" />
-                                                        </Border>
-                                                    </Grid>
+                                                            </Border>
+                                                        </Grid>
 
-                                                    <WrapPanel Grid.Row="1"
+                                                        <WrapPanel Grid.Row="1"
                                                                Margin="0,5,0,0">
-                                                        <TextBlock Text="{Binding Format}"
+                                                            <TextBlock Text="{Binding Format}"
                                                                    Style="{StaticResource MutedTextStyle}" />
-                                                        <TextBlock Text="  •  "
+                                                            <TextBlock Text="  •  "
                                                                    Style="{StaticResource MutedTextStyle}" />
-                                                        <TextBlock Style="{StaticResource MutedTextStyle}">
-                                                            <TextBlock.Text>
-                                                                <MultiBinding StringFormat="{}{0:0} × {1:0}">
-                                                                    <Binding Path="Width" />
-                                                                    <Binding Path="Height" />
-                                                                </MultiBinding>
-                                                            </TextBlock.Text>
-                                                        </TextBlock>
-                                                        <TextBlock Text="  •  "
+                                                            <TextBlock Style="{StaticResource MutedTextStyle}">
+                                                                <TextBlock.Text>
+                                                                    <MultiBinding StringFormat="{}{0:0} × {1:0}">
+                                                                        <Binding Path="Width" />
+                                                                        <Binding Path="Height" />
+                                                                    </MultiBinding>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                            <TextBlock Text="  •  "
                                                                    Style="{StaticResource MutedTextStyle}" />
-                                                        <TextBlock Text="{Binding OriginalSizeBytes, Converter={StaticResource FileSizeConverter}}"
+                                                            <TextBlock Text="{Binding OriginalSizeBytes, Converter={StaticResource FileSizeConverter}}"
                                                                    Style="{StaticResource MutedTextStyle}" />
-                                                    </WrapPanel>
+                                                        </WrapPanel>
 
-                                                    <Grid Grid.Row="2"
+                                                        <Grid Grid.Row="2"
                                                           Margin="0,13,0,0">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="*" />
-                                                        </Grid.ColumnDefinitions>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
 
-                                                        <StackPanel Grid.Column="0">
-                                                            <TextBlock Text="PLANNED"
+                                                            <StackPanel Grid.Column="0">
+                                                                <TextBlock Text="PLANNED"
                                                                        Foreground="{DynamicResource AccentBrush}"
                                                                        FontSize="10"
                                                                        FontWeight="SemiBold" />
-                                                            <Grid Margin="0,3,0,0">
-                                                                <TextBlock Text="Output format and dimensions not set">
-                                                                    <TextBlock.Style>
-                                                                        <Style TargetType="{x:Type TextBlock}"
+                                                                <Grid Margin="0,3,0,0">
+                                                                    <TextBlock Text="Output format and dimensions not set">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="{x:Type TextBlock}"
                                                                                BasedOn="{StaticResource MutedTextStyle}">
-                                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
                                                                                              Value="{x:Null}">
-                                                                                    <Setter Property="Visibility" Value="Visible" />
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </TextBlock.Style>
-                                                                </TextBlock>
+                                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
 
-                                                                <WrapPanel>
-                                                                    <WrapPanel.Style>
-                                                                        <Style TargetType="{x:Type WrapPanel}">
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                    <WrapPanel>
+                                                                        <WrapPanel.Style>
+                                                                            <Style TargetType="{x:Type WrapPanel}">
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
                                                                                              Value="{x:Null}">
-                                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </WrapPanel.Style>
-                                                                    <TextBlock Text="{Binding AssignedOptimisationSettings.OutputFormat}" />
-                                                                    <TextBlock Text="  •  "
+                                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </WrapPanel.Style>
+                                                                        <TextBlock Text="{Binding AssignedOptimisationSettings.OutputFormat}" />
+                                                                        <TextBlock Text="  •  "
                                                                                Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding PlannedDimensionsText}" />
-                                                                </WrapPanel>
-                                                            </Grid>
-                                                            <StackPanel Margin="0,3,0,0">
-                                                                <TextBlock Text="File size target not set">
+                                                                        <TextBlock Text="{Binding PlannedDimensionsText}" />
+                                                                    </WrapPanel>
+                                                                </Grid>
+                                                                <StackPanel Margin="0,3,0,0">
+                                                                    <TextBlock Text="File size target not set">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="{x:Type TextBlock}"
+                                                                               BasedOn="{StaticResource MutedTextStyle}">
+                                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <StackPanel.Style>
+                                                                            <Style TargetType="{x:Type StackPanel}">
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
+                                                                                             Value="{x:Null}">
+                                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </StackPanel.Style>
+                                                                        <TextBlock Text="File size target: "
+                                                                               Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding AssignedOptimisationSettings.TargetSizeBytes, Converter={StaticResource FileSizeConverter}}"
+                                                                               Style="{StaticResource MutedTextStyle}" />
+                                                                    </StackPanel>
+                                                                </StackPanel>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="1"
+                                                                    Margin="12,0,0,0">
+                                                                <TextBlock Text="RESULT"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold" />
+
+                                                                <TextBlock Text="No output yet"
+                                                                       Margin="0,7,0,0">
                                                                     <TextBlock.Style>
                                                                         <Style TargetType="{x:Type TextBlock}"
-                                                                               BasedOn="{StaticResource MutedTextStyle}">
+                                                                           BasedOn="{StaticResource MutedTextStyle}">
                                                                             <Setter Property="Visibility" Value="Collapsed" />
                                                                             <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
-                                                                                             Value="{x:Null}">
+                                                                                <DataTrigger Binding="{Binding OptimisationResult}"
+                                                                                         Value="{x:Null}">
                                                                                     <Setter Property="Visibility" Value="Visible" />
                                                                                 </DataTrigger>
                                                                             </Style.Triggers>
@@ -548,118 +627,76 @@
                                                                     </TextBlock.Style>
                                                                 </TextBlock>
 
-                                                                <StackPanel Orientation="Horizontal">
+                                                                <StackPanel>
                                                                     <StackPanel.Style>
                                                                         <Style TargetType="{x:Type StackPanel}">
+                                                                            <Setter Property="Visibility" Value="Visible" />
                                                                             <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding AssignedOptimisationSettings}"
-                                                                                             Value="{x:Null}">
+                                                                                <DataTrigger Binding="{Binding OptimisationResult}"
+                                                                                         Value="{x:Null}">
                                                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                                                 </DataTrigger>
                                                                             </Style.Triggers>
                                                                         </Style>
                                                                     </StackPanel.Style>
-                                                                    <TextBlock Text="File size target: "
-                                                                               Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding AssignedOptimisationSettings.TargetSizeBytes, Converter={StaticResource FileSizeConverter}}"
-                                                                               Style="{StaticResource MutedTextStyle}" />
-                                                                </StackPanel>
-                                                            </StackPanel>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="1"
-                                                                    Margin="12,0,0,0">
-                                                            <TextBlock Text="RESULT"
-                                                                       Foreground="{DynamicResource AccentBrush}"
-                                                                       FontSize="10"
-                                                                       FontWeight="SemiBold" />
-
-                                                            <TextBlock Text="No output yet"
-                                                                       Margin="0,7,0,0">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="{x:Type TextBlock}"
-                                                                           BasedOn="{StaticResource MutedTextStyle}">
-                                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding OptimisationResult}"
-                                                                                         Value="{x:Null}">
-                                                                                <Setter Property="Visibility" Value="Visible" />
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-
-                                                            <StackPanel>
-                                                                <StackPanel.Style>
-                                                                    <Style TargetType="{x:Type StackPanel}">
-                                                                        <Setter Property="Visibility" Value="Visible" />
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding OptimisationResult}"
-                                                                                         Value="{x:Null}">
-                                                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </StackPanel.Style>
-                                                                <WrapPanel Margin="0,3,0,0">
-                                                                    <TextBlock Text="{Binding FinalDimensionsText}" />
-                                                                    <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding OptimisationResult.SizeBytes, Converter={StaticResource FileSizeConverter}}" />
-                                                                    <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding SavingsText, StringFormat={}{0} saved}" />
-                                                                </WrapPanel>
-                                                                <WrapPanel Margin="0,3,0,0">
-                                                                    <TextBlock Text="Quality " Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding QualityText}" Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="  •  Target " Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding TargetResultText}" Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="  •  File " Style="{StaticResource MutedTextStyle}" />
-                                                                    <TextBlock Text="{Binding ExportFileNameText}"
+                                                                    <WrapPanel Margin="0,3,0,0">
+                                                                        <TextBlock Text="{Binding FinalDimensionsText}" />
+                                                                        <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding OptimisationResult.SizeBytes, Converter={StaticResource FileSizeConverter}}" />
+                                                                        <TextBlock Text="  •  " Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding SavingsText, StringFormat={}{0} saved}" />
+                                                                    </WrapPanel>
+                                                                    <WrapPanel Margin="0,3,0,0">
+                                                                        <TextBlock Text="Quality " Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding QualityText}" Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="  •  Target " Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding TargetResultText}" Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="  •  File " Style="{StaticResource MutedTextStyle}" />
+                                                                        <TextBlock Text="{Binding ExportFileNameText}"
                                                                                Style="{StaticResource MutedTextStyle}"
                                                                                ToolTip="{Binding ExportPath}" />
-                                                                </WrapPanel>
+                                                                    </WrapPanel>
+                                                                </StackPanel>
                                                             </StackPanel>
-                                                        </StackPanel>
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </controls:ImageListBox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </controls:ImageListBox>
 
-                                <StackPanel VerticalAlignment="Center"
+                                    <StackPanel VerticalAlignment="Center"
                                             HorizontalAlignment="Center"
                                             IsHitTestVisible="False"
                                             Margin="20">
-                                    <StackPanel.Style>
-                                        <Style TargetType="{x:Type StackPanel}">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsBatchEmpty}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
+                                        <StackPanel.Style>
+                                            <Style TargetType="{x:Type StackPanel}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsBatchEmpty}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
 
-                                    <TextBlock Text="No images imported"
+                                        <TextBlock Text="No images imported"
                                                Margin="0,18,0,0"
                                                FontSize="22"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Center" />
 
-                                    <TextBlock Text="Import images or a folder to get started."
+                                        <TextBlock Text="Import images or a folder to get started."
                                                Margin="0,8,0,0"
                                                FontSize="14"
                                                Style="{StaticResource MutedTextStyle}"
                                                HorizontalAlignment="Center" />
 
-                                    <TextBlock Text="JPEG, PNG and WebP are supported."
+                                        <TextBlock Text="JPEG, PNG and WebP are supported."
                                                Margin="0,6,0,0"
                                                Style="{StaticResource MutedTextStyle}"
                                                HorizontalAlignment="Center" />
-                                </StackPanel>
+                                    </StackPanel>
                                 </Grid>
 
                                 <Border x:Name="OptimisingOverlay"
@@ -878,27 +915,51 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Release notes" FontSize="28" FontWeight="SemiBold" />
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Button x:Name="RefreshReleaseNotesButton" Margin="0,0,10,0"
-                                            Style="{StaticResource AccentOutlineButtonStyle}" Click="RefreshReleaseNotes_Click">
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Release notes"
+                                               FontSize="28"
+                                               FontWeight="SemiBold" />
+
+                                    <TextBlock x:Name="ReleaseNotesStatus"
+                                               Text="Checking for release notes…"
+                                               Margin="0,6,20,0"
+                                               TextWrapping="Wrap"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               Visibility="Collapsed" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Top">
+
+                                    <Button x:Name="RefreshReleaseNotesButton"
+                                            Margin="0,0,10,0"
+                                            Style="{StaticResource AccentOutlineButtonStyle}"
+                                            Click="RefreshReleaseNotes_Click">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE72C;" Style="{StaticResource IconTextStyle}"
-                                                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,8,0" />
+                                            <TextBlock Text="&#xE72C;"
+                                                       Style="{StaticResource IconTextStyle}"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Margin="0,0,8,0" />
                                             <TextBlock Text="Refresh" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Style="{StaticResource AccentOutlineButtonStyle}" Click="BackToOptimiser_Click">
+
+                                    <Button Style="{StaticResource AccentOutlineButtonStyle}"
+                                            Click="BackToOptimiser_Click">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="&#xE72B;" Style="{StaticResource IconTextStyle}"
-                                                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,8,0" />
+                                            <TextBlock Text="&#xE72B;"
+                                                       Style="{StaticResource IconTextStyle}"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Margin="0,0,8,0" />
                                             <TextBlock Text="Back to optimiser" />
                                         </StackPanel>
                                     </Button>
+
                                 </StackPanel>
                             </Grid>
-                            <TextBlock x:Name="ReleaseNotesStatus" Text="Checking for release notes…"
-                                       Margin="0,0,0,16" TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" />
+
                             <ItemsControl x:Name="ReleaseNotesHistory" AutomationProperties.Name="Release history">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -906,6 +967,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            <ContentControl ContentTemplate="{StaticResource CreditFooterTemplate}" />
                         </StackPanel>
                     </ScrollViewer>
                 </Border>
@@ -1057,6 +1119,7 @@
                                            TextWrapping="Wrap"
                                            AutomationProperties.LiveSetting="Polite" />
                             </StackPanel>
+     
                         </StackPanel>
                     </ScrollViewer>
                 </Border>
@@ -1358,38 +1421,107 @@
                                                Margin="0,8,0,0"
                                                Style="{StaticResource MutedTextStyle}"
                                                TextWrapping="Wrap" />
-
-                                    <TextBlock Margin="0,14,0,0" TextWrapping="Wrap">
-                                        <Run Text="Ready: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+                                    <TextBlock Margin="0,14,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Ready"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Ready"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The image is waiting to be processed. Make sure settings have been applied before optimising." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Processing: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Processing"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Processing"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The image is currently being optimised." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Complete: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Complete"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Complete"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The image has been optimised and meets its file-size target. It is ready to export." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Target missed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Target missed"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Target missed"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The image has been optimised but exceeds its file-size target. You can still export it, or adjust its settings and optimise again." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Exported: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Exported"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Exported"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The result has been saved to your chosen folder." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Failed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Failed"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Failed"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The image could not be processed. Hover over the status pill to see the error details." />
                                     </TextBlock>
-                                    <TextBlock Margin="0,12,0,0" TextWrapping="Wrap">
-                                        <Run Text="Export failed: " FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+
+                                    <TextBlock Margin="0,12,0,0"
+                                               TextWrapping="Wrap">
+                                        <InlineUIContainer BaselineAlignment="Center">
+                                            <Border Style="{StaticResource StatusPillStyle}"
+                                                    Tag="Export failed"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock Text="Export failed"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                        </InlineUIContainer>
                                         <Run Text="The result could not be saved. Hover over the status pill for details, then try exporting again, choosing another folder if needed." />
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
 
+                            <ContentControl ContentTemplate="{StaticResource CreditFooterTemplate}" />
 
                         </StackPanel>
                     </ScrollViewer>
