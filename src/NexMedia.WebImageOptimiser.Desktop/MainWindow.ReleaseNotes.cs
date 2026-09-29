@@ -10,6 +10,8 @@ public partial class MainWindow
     private static readonly HttpClient ReleaseNotesClient = new() { Timeout = TimeSpan.FromSeconds(15) };
     private readonly GitHubReleaseNotesService releaseNotesService = new(ReleaseNotesClient);
     private bool loadingReleaseNotes;
+    private bool refreshingReleases;
+    private ViewModels.ReleaseNoteCardViewModel[] releaseCards = [];
     private readonly ReleaseNotesReadState releaseNotesReadState = new(System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "NexMedia", "WebImageOptimiser", "viewed-release.txt"));
@@ -20,13 +22,24 @@ public partial class MainWindow
         bool show = ReleaseNotesNavigationButton.IsChecked == true;
         BackToOptimiser_Click(sender, e);
         ReleaseNotesNavigationButton.IsChecked = show;
+        SetOptimiserVisibility(!show);
         ReleaseNotesPage.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         MainHeaderCopy.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
         UpdateReleaseNotesIndicator();
     }
 
     private async void RefreshReleaseNotes_Click(object sender, RoutedEventArgs e)
-        => await LoadReleaseNotesAsync();
+    {
+        if (refreshingReleases) return;
+        refreshingReleases = true;
+        RefreshReleaseNotesButton.IsEnabled = false;
+        try { await Task.WhenAll(LoadReleaseNotesAsync(), CheckForUpdatesAsync(manual: true)); }
+        finally
+        {
+            refreshingReleases = false;
+            RefreshReleaseNotesButton.IsEnabled = true;
+        }
+    }
 
     private void UpdateReleaseNotesIndicator()
     {
@@ -49,8 +62,10 @@ public partial class MainWindow
         {
             var history = await releaseNotesService.GetHistoryAsync();
             latestRelease = history.FirstOrDefault();
-            ReleaseNotesHistory.ItemsSource = history.Select((notes, index) =>
-                new ViewModels.ReleaseNoteCardViewModel(notes, IsLatest: index == 0)).ToArray();
+            releaseCards = history.Select((notes, index) =>
+                new ViewModels.ReleaseNoteCardViewModel(notes, isLatest: index == 0)).ToArray();
+            foreach (var card in releaseCards) card.Update(updateStatus);
+            ReleaseNotesHistory.ItemsSource = releaseCards;
             ReleaseNotesStatus.Text = history.Count == 0 ? "No releases published yet." : "";
             ReleaseNotesStatus.Visibility = history.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             UpdateReleaseNotesIndicator();
@@ -68,7 +83,7 @@ public partial class MainWindow
         finally
         {
             loadingReleaseNotes = false;
-            RefreshReleaseNotesButton.IsEnabled = true;
+            RefreshReleaseNotesButton.IsEnabled = !refreshingReleases;
         }
     }
 }

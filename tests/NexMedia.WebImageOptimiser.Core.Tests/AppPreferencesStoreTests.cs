@@ -68,7 +68,7 @@ public sealed class AppPreferencesStoreTests
         Directory.CreateDirectory(directory);
         File.WriteAllText(filePath, json);
         Assert.AreEqual(new AppPreferences(), new AppPreferencesStore(filePath).Load(out string? warning));
-        Assert.IsNotNull(warning);
+        Assert.AreEqual("Saved settings could not be loaded. Defaults are in use. Save settings to replace the invalid or unreadable settings file.", warning);
         Assert.AreEqual(json, File.ReadAllText(filePath));
     }
 

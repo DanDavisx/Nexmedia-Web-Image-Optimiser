@@ -9,8 +9,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using NexMedia.WebImageOptimiser.Core.Configuration;
 using NexMedia.WebImageOptimiser.Core.Exporting;
@@ -33,11 +33,8 @@ public partial class MainWindow : Window
         TimeSpan.FromMilliseconds(250);
 
     private readonly DispatcherTimer headlineRotationTimer = new();
-
     private readonly DispatcherTimer optimisingSpinnerTimer = new();
-
     private BitmapSource[] optimisingSpinnerFrames = [];
-
     private int optimisingSpinnerFrameIndex;
 
     private IReadOnlyList<string> headlineMessages = [];
@@ -72,8 +69,21 @@ public partial class MainWindow : Window
 
         ConfigureHeadlineRotation();
         ConfigureOptimisingSpinner();
+        UpdateOptimisingIndicator();
+        AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(Control_PreviewKeyDown));
         viewModel.PropertyChanged += Preferences_PropertyChanged;
         SettingsFeedbackText.Text = warning ?? "Save settings to remember your preferences on this computer.";
+    }
+
+    private void Control_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // Show the choices before navigating them with the arrow keys.
+        if (e.OriginalSource is ComboBox combo && combo.IsEnabled &&
+            !combo.IsDropDownOpen && e.Key is Key.Down or Key.Up or Key.Space)
+        {
+            combo.IsDropDownOpen = true;
+            e.Handled = true;
+        }
     }
 
     private void Preferences_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -84,6 +94,7 @@ public partial class MainWindow : Window
         if (e.PropertyName == nameof(MainWindowViewModel.InterfaceAnimationsEnabled))
         {
             AppearanceManager.ApplyAnimations(ViewModel.InterfaceAnimationsEnabled);
+            UpdateOptimisingIndicator();
             headlineAnimationCancellation.Cancel();
             headlineAnimationCancellation.Dispose();
             headlineAnimationCancellation = new();
@@ -91,7 +102,6 @@ public partial class MainWindow : Window
             SetHeadlineImmediately(headlineMessages[headlineMessageIndex]);
             if (ViewModel.InterfaceAnimationsEnabled && headlineMessages.Count > 1)
                 headlineRotationTimer.Start();
-            if (!ViewModel.InterfaceAnimationsEnabled) StopOptimisingSpinner();
         }
 
         if (e.PropertyName is nameof(MainWindowViewModel.SelectedTheme)
@@ -472,8 +482,7 @@ public partial class MainWindow : Window
 
         OptimisingOverlay.Opacity = 0;
         OptimisingOverlay.Visibility = Visibility.Visible;
-
-        StartOptimisingSpinner();
+        UpdateOptimisingIndicator();
 
         await Task.WhenAll(
             AnimateElementOpacityAsync(
@@ -499,8 +508,8 @@ public partial class MainWindow : Window
             0,
             ViewModel.InterfaceAnimationsEnabled ? OptimisationAreaFadeDuration : TimeSpan.Zero);
 
-        StopOptimisingSpinner();
         OptimisingOverlay.Visibility = Visibility.Collapsed;
+        StopOptimisingSpinner();
     }
 
     private void StartOptimisingSpinner()
@@ -535,6 +544,15 @@ public partial class MainWindow : Window
             optimisingSpinnerFrames[optimisingSpinnerFrameIndex];
     }
 
+    private void UpdateOptimisingIndicator()
+    {
+        bool animate = ViewModel.InterfaceAnimationsEnabled;
+        OptimisingSpinnerFrame.Visibility = animate ? Visibility.Visible : Visibility.Collapsed;
+        OptimisingStaticIcon.Visibility = animate ? Visibility.Collapsed : Visibility.Visible;
+        if (animate && OptimisingOverlay.Visibility == Visibility.Visible) StartOptimisingSpinner();
+        else StopOptimisingSpinner();
+    }
+
     protected override void OnClosed(EventArgs e)
     {
         ViewModel.PropertyChanged -= Preferences_PropertyChanged;
@@ -543,10 +561,9 @@ public partial class MainWindow : Window
         headlineRotationTimer.Stop();
         headlineRotationTimer.Tick -=
             HeadlineRotationTimer_Tick;
-        StopOptimisingSpinner();
-        optimisingSpinnerTimer.Tick -=
-            OptimisingSpinnerTimer_Tick;
 
+        StopOptimisingSpinner();
+        optimisingSpinnerTimer.Tick -= OptimisingSpinnerTimer_Tick;
         base.OnClosed(e);
     }
 
@@ -603,6 +620,7 @@ public partial class MainWindow : Window
         SettingsPage.Visibility = showSettings
             ? Visibility.Visible
             : Visibility.Collapsed;
+        SetOptimiserVisibility(!showSettings);
         HelpPage.Visibility = Visibility.Collapsed;
         HelpNavigationButton.IsChecked = false;
         ReleaseNotesPage.Visibility = Visibility.Collapsed;
@@ -622,6 +640,7 @@ public partial class MainWindow : Window
         HelpPage.Visibility = showHelp
             ? Visibility.Visible
             : Visibility.Collapsed;
+        SetOptimiserVisibility(!showHelp);
         SettingsPage.Visibility = Visibility.Collapsed;
         SettingsNavigationButton.IsChecked = false;
         MainHeaderCopy.Visibility = showHelp
@@ -631,10 +650,17 @@ public partial class MainWindow : Window
         ReleaseNotesNavigationButton.IsChecked = false;
     }
 
+    private void SetOptimiserVisibility(bool visible)
+    {
+        OptimiserContent.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        OptimiserFooter.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void BackToOptimiser_Click(
         object sender,
         RoutedEventArgs e)
     {
+        SetOptimiserVisibility(true);
         SettingsPage.Visibility = Visibility.Collapsed;
         HelpPage.Visibility = Visibility.Collapsed;
         SettingsNavigationButton.IsChecked = false;
@@ -677,6 +703,11 @@ public partial class MainWindow : Window
     {
         ImagesGrid.SelectAll();
         ImagesGrid.Focus();
+    }
+
+    private void UnselectAll_Click(object sender, RoutedEventArgs e)
+    {
+        ImagesGrid.UnselectAll();
     }
 
     private void ImagesGrid_SelectionChanged(
@@ -870,6 +901,8 @@ public partial class MainWindow : Window
         bool selectionHasSuccessfulResults =
             selectedImages.Any(image =>
                 image.OptimisationResult is not null);
+
+        UnselectAllButton.IsEnabled = hasSelection && !isBusy;
 
         RemoveSelectedButton.IsEnabled =
             hasSelection && !isBusy;
@@ -1066,14 +1099,17 @@ public partial class MainWindow : Window
     private void ShowImportSummary(
         ImageImportResult result)
     {
-        if (result.DuplicatePaths.Count == 0 &&
+        if (result.ImportedImages.Count > 0 &&
+            result.DuplicatePaths.Count == 0 &&
             result.FailedFiles.Count == 0)
         {
             return;
         }
 
         string message =
-            $"Imported: {result.ImportedImages.Count}";
+            result.ImportedImages.Count == 0 && result.DuplicatePaths.Count == 0 && result.FailedFiles.Count == 0
+                ? "No supported images were found in the selected folder."
+                : $"Imported: {result.ImportedImages.Count}";
 
         if (result.DuplicatePaths.Count > 0)
         {

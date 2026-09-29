@@ -5,6 +5,7 @@
 artifacts/
 **/publish/
 **/Releases/
+**/docs/
 
 .vs/
 *.user

@@ -26,7 +26,7 @@ public sealed class AppPreferencesStore(string filePath)
         catch (DirectoryNotFoundException) { return new(); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
         {
-            warning = "Saved settings could not be loaded. Defaults are in use. " + ex.Message;
+            warning = "Saved settings could not be loaded. Defaults are in use. Save settings to replace the invalid or unreadable settings file.";
             return new();
         }
     }
