@@ -5,7 +5,7 @@
 artifacts/
 **/publish/
 **/Releases/
-**/docs/
+**/docs/Manual-Test-Cases.xlsx/
 
 .vs/
 *.user
