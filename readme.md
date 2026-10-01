@@ -14,7 +14,7 @@ A lightweight batch image optimiser designed for web use. Easily convert unoptim
 
 * Batch import individual images or entire folders.
 * Supports JPEG, PNG, WebP.
-* Convert to WEBP or PNG (PNG is lossless and no compression is applied).
+* Convert to WEBP or PNG (PNG is lossless and no compression is applied - this may not be the best application for you if you want to work with PNG exclusively).
 * Automatically chooses an optimal compression level based on the target dimensions and file size limit (WEBP only).
 * Does not modify or overwrite original images.
 * Automatic app updates and release notes section.
