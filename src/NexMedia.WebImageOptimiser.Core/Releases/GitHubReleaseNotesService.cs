@@ -11,6 +11,12 @@ public sealed record ReleaseNotes(
     [property: JsonPropertyName("body")] string? Body,
     [property: JsonPropertyName("published_at")] DateTimeOffset? PublishedAt)
 {
+    [JsonPropertyName("prerelease")]
+    public bool IsPrerelease { get; init; }
+    [JsonPropertyName("draft")]
+    public bool IsDraft { get; init; }
+    public bool IsStable => !IsPrerelease && !IsDraft && !string.IsNullOrWhiteSpace(Tag)
+        && !Tag.Split('+')[0].Contains('-');
     public bool HasNotes => !string.IsNullOrWhiteSpace(Body);
     public string DisplayName => string.IsNullOrWhiteSpace(Tag)
         ? string.IsNullOrWhiteSpace(Name) ? "Untitled release" : Name
@@ -19,18 +25,31 @@ public sealed record ReleaseNotes(
 
 public sealed class GitHubReleaseNotesService(HttpClient client)
 {
-    public async Task<ReleaseNotes?> GetLatestAsync(CancellationToken cancellationToken = default)
-        => (await GetPageAsync(1, cancellationToken)).FirstOrDefault();
+    private readonly SemaphoreSlim cacheLock = new(1, 1);
+    private IReadOnlyList<ReleaseNotes>? cachedHistory;
 
-    public async Task<IReadOnlyList<ReleaseNotes>> GetHistoryAsync(CancellationToken cancellationToken = default)
+    public async Task<ReleaseNotes?> GetLatestAsync(CancellationToken cancellationToken = default)
+        => (await GetHistoryAsync(cancellationToken)).FirstOrDefault();
+
+    public async Task<IReadOnlyList<ReleaseNotes>> GetHistoryAsync(CancellationToken cancellationToken = default, bool forceRefresh = false)
     {
-        var history = new List<ReleaseNotes>();
-        for (int page = 1; ; page++)
+        await cacheLock.WaitAsync(cancellationToken);
+        try
         {
-            var releases = await GetPageAsync(page, cancellationToken);
-            history.AddRange(releases);
-            if (releases.Length < 100) return history.OrderByDescending(release => release.PublishedAt).ToArray();
+            if (!forceRefresh && cachedHistory is not null) return cachedHistory;
+            var history = new List<ReleaseNotes>();
+            for (int page = 1; ; page++)
+            {
+                var releases = await GetPageAsync(page, cancellationToken);
+                history.AddRange(releases.Where(release => release.IsStable));
+                if (releases.Length < 100)
+                {
+                    cachedHistory = Array.AsReadOnly(history.OrderByDescending(release => release.PublishedAt).ToArray());
+                    return cachedHistory;
+                }
+            }
         }
+        finally { cacheLock.Release(); }
     }
 
     private async Task<ReleaseNotes[]> GetPageAsync(int page, CancellationToken cancellationToken)

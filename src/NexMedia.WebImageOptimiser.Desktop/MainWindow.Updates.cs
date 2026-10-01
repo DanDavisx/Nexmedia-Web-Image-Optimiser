@@ -13,7 +13,9 @@ public partial class MainWindow
     {
         updateStatus = status;
         UpdateStatusText.Text = status.Message;
+        ReleaseNotesUpdateStatusText.Text = status.Message;
         foreach (var card in releaseCards) card.Update(status);
+        UpdateReleaseRefreshControls();
     }
 
     private async void ReleaseUpdate_Click(object sender, RoutedEventArgs e)
@@ -32,19 +34,19 @@ public partial class MainWindow
                 SetUpdateStatus(new(AppUpdateState.Failed, "Could not restart to update. Refresh and try again.", updateStatus.Version));
             }
         }
-        else await CheckForUpdatesAsync(manual: true);
+        else await RefreshReleasesAsync();
     }
 
     private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
     {
-        await CheckForUpdatesAsync(manual: true);
+        await RefreshReleasesAsync();
     }
 
     private async Task CheckForUpdatesAsync(bool manual)
     {
         if (checkingForUpdates) return;
         checkingForUpdates = true;
-        CheckForUpdatesButton.IsEnabled = false;
+        UpdateReleaseRefreshControls();
         SetUpdateStatus(new(AppUpdateState.Checking, "Checking for updates; new versions download automatically…"));
         try
         {
@@ -57,7 +59,7 @@ public partial class MainWindow
         finally
         {
             checkingForUpdates = false;
-            CheckForUpdatesButton.IsEnabled = true;
+            UpdateReleaseRefreshControls();
         }
     }
 }

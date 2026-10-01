@@ -4,7 +4,6 @@ using System.Windows.Input;
 
 namespace NexMedia.WebImageOptimiser.Desktop.Controls;
 
-// Moving keyboard focus must not change the batch selection.
 public sealed class ImageListBox : ListBox
 {
     protected override DependencyObject GetContainerForItemOverride() => new ImageListBoxItem();

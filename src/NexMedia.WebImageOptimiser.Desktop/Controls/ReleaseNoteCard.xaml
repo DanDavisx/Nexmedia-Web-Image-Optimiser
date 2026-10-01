@@ -43,31 +43,7 @@
             </Grid>
             <TextBlock Text="{Binding Notes.PublishedAt, StringFormat={}{0:d MMM yyyy}}"
                        Style="{StaticResource MutedTextStyle}" Margin="0,6,0,12" />
-            <TextBlock Text="{Binding UpdateMessage}"
-               TextWrapping="Wrap"
-               Margin="0,0,0,8">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock"
-                        BasedOn="{StaticResource MutedTextStyle}">
-
-                        <Setter Property="Visibility" Value="Visible" />
-
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding UpdateMessage}"
-                             Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding UpdateMessage}"
-                             Value="">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-            <Button Content="{Binding UpdateActionText}" HorizontalAlignment="Left"
+            <Button Content="{Binding UpdateActionText}" IsEnabled="{Binding IsUpdateActionEnabled}" HorizontalAlignment="Left"
                     Margin="0,0,0,12" Click="Update_Click">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">

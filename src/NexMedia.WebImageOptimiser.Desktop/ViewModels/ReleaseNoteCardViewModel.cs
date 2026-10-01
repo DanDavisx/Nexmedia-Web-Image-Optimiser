@@ -15,15 +15,21 @@ public sealed class ReleaseNoteCardViewModel(ReleaseNotes notes, bool isLatest) 
         typeof(ReleaseNoteCardViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
     private AppUpdateStatus status = new(AppUpdateState.Idle, "");
     private bool IsTarget => VersionsMatch(Notes.Tag, status.Version);
-    public string UpdateMessage => IsTarget || IsLatest ? status.Message : "";
-    public bool ShowUpdateAction => IsTarget && status.State is AppUpdateState.Ready or AppUpdateState.Failed;
-    public string UpdateActionText => status.State == AppUpdateState.Ready ? "Restart to update" : "Retry update";
+    public bool ShowUpdateAction => IsReady || (IsLatest && !IsCurrentVersion);
+    public bool IsUpdateActionEnabled { get; private set; } = true;
+    public string UpdateActionText => IsReady ? "Restart to update" : "Check for update";
     public bool IsReady => IsTarget && status.State == AppUpdateState.Ready;
 
     public void Update(AppUpdateStatus value)
     {
         status = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+    }
+
+    public void SetUpdateActionEnabled(bool enabled)
+    {
+        IsUpdateActionEnabled = enabled;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUpdateActionEnabled)));
     }
 
     public static bool VersionsMatch(string? left, string? right)

@@ -8,8 +8,6 @@ using NexMedia.WebImageOptimiser.Desktop.Converters;
 
 namespace NexMedia.WebImageOptimiser.Desktop.Controls;
 
-// Cache per batch item so recycling cards does not decode the same file repeatedly.
-// Weak keys release thumbnails when their batch items are removed.
 public sealed class ImageThumbnail : Image
 {
     private static readonly ConditionalWeakTable<ImageBatchItem, Lazy<Task<ImageSource?>>> Cache = new();

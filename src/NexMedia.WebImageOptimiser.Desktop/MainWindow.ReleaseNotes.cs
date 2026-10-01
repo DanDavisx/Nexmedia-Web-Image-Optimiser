@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Net;
 using System.Text.Json;
 using System.Windows;
 using NexMedia.WebImageOptimiser.Core.Releases;
@@ -11,6 +12,8 @@ public partial class MainWindow
     private readonly GitHubReleaseNotesService releaseNotesService = new(ReleaseNotesClient);
     private bool loadingReleaseNotes;
     private bool refreshingReleases;
+    private DateTimeOffset nextReleaseRefresh;
+    private readonly System.Windows.Threading.DispatcherTimer releaseRefreshTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private ViewModels.ReleaseNoteCardViewModel[] releaseCards = [];
     private readonly ReleaseNotesReadState releaseNotesReadState = new(System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -29,15 +32,33 @@ public partial class MainWindow
     }
 
     private async void RefreshReleaseNotes_Click(object sender, RoutedEventArgs e)
+        => await RefreshReleasesAsync();
+
+    private void UpdateReleaseRefreshControls()
     {
-        if (refreshingReleases) return;
+        bool coolingDown = DateTimeOffset.UtcNow < nextReleaseRefresh;
+        bool enabled = !refreshingReleases && !loadingReleaseNotes && !checkingForUpdates && !coolingDown;
+        RefreshReleaseNotesButton.IsEnabled = enabled;
+        CheckForUpdatesButton.IsEnabled = enabled;
+        RefreshReleaseNotesButton.ToolTip = coolingDown
+            ? $"Refresh available in {Math.Ceiling((nextReleaseRefresh - DateTimeOffset.UtcNow).TotalSeconds)} seconds."
+            : "Refresh release notes and check for updates";
+        foreach (var card in releaseCards) card.SetUpdateActionEnabled(card.IsReady || enabled);
+        if (!coolingDown) releaseRefreshTimer.Stop();
+    }
+
+    private async Task RefreshReleasesAsync()
+    {
+        if (refreshingReleases || loadingReleaseNotes || checkingForUpdates || DateTimeOffset.UtcNow < nextReleaseRefresh) return;
         refreshingReleases = true;
-        RefreshReleaseNotesButton.IsEnabled = false;
-        try { await Task.WhenAll(LoadReleaseNotesAsync(), CheckForUpdatesAsync(manual: true)); }
+        nextReleaseRefresh = DateTimeOffset.UtcNow.AddSeconds(30);
+        releaseRefreshTimer.Start();
+        UpdateReleaseRefreshControls();
+        try { await Task.WhenAll(LoadReleaseNotesAsync(forceRefresh: true), CheckForUpdatesAsync(manual: true)); }
         finally
         {
             refreshingReleases = false;
-            RefreshReleaseNotesButton.IsEnabled = true;
+            UpdateReleaseRefreshControls();
         }
     }
 
@@ -51,23 +72,20 @@ public partial class MainWindow
         ReleaseNotesNavigationButton.ToolTip = unread ? "Unread release notes available" : "Release notes";
     }
 
-    private async Task LoadReleaseNotesAsync()
+    private async Task LoadReleaseNotesAsync(bool forceRefresh = false)
     {
         if (loadingReleaseNotes) return;
         loadingReleaseNotes = true;
-        RefreshReleaseNotesButton.IsEnabled = false;
+        UpdateReleaseRefreshControls();
         ReleaseNotesStatus.Text = "Checking for release notes…";
         ReleaseNotesStatus.Visibility = Visibility.Visible;
         try
         {
-            var history = await releaseNotesService.GetHistoryAsync();
+            var history = await releaseNotesService.GetHistoryAsync(forceRefresh: forceRefresh);
             latestRelease = history.FirstOrDefault();
             releaseCards = history.Select((notes, index) =>
                 new ViewModels.ReleaseNoteCardViewModel(notes, isLatest: index == 0)).ToArray();
-            if (releaseCards.Length > 0)
-            {
-                releaseCards[0].Update(updateStatus);
-            }
+            foreach (var card in releaseCards) card.Update(updateStatus);
             ReleaseNotesHistory.ItemsSource = releaseCards;
             ReleaseNotesStatus.Text = history.Count == 0 ? "No releases published yet." : "";
             ReleaseNotesStatus.Visibility = history.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -79,6 +97,8 @@ public partial class MainWindow
             ReleaseNotesStatus.Text = exception switch
             {
                 JsonException => "The release notes response could not be read. Try Refresh later.",
+                HttpRequestException { StatusCode: HttpStatusCode.Forbidden or HttpStatusCode.TooManyRequests }
+                    => "GitHub has temporarily rate-limited requests. Please try Refresh later.",
                 HttpRequestException { StatusCode: not null } => "The release notes service is unavailable. Try Refresh later.",
                 _ => "Could not connect to the release notes service. Check your connection and try Refresh."
             };
@@ -86,7 +106,7 @@ public partial class MainWindow
         finally
         {
             loadingReleaseNotes = false;
-            RefreshReleaseNotesButton.IsEnabled = !refreshingReleases;
+            UpdateReleaseRefreshControls();
         }
     }
 }

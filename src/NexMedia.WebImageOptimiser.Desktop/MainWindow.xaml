@@ -275,12 +275,10 @@
                         <ColumnDefinition Width="310" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
                         <WrapPanel x:Name="BatchActionsPanel"
                                    Grid.Row="0"
@@ -729,36 +727,7 @@
                             </Grid>
                         </Border>
 
-                        <WrapPanel Grid.Row="2"
-                                   Margin="0,13,0,0">
-                            <Button x:Name="ExportAllButton"
-                                    Style="{StaticResource AccentOutlineButtonStyle}"
-                                    Margin="0,0,9,0"
-                                    IsEnabled="False"
-                                    Click="ExportAll_Click">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE72D;"
-                                               Style="{StaticResource IconTextStyle}"
-                                               Margin="0,0,9,0" />
-                                    <TextBlock Text="Export all successful…" />
-                                </StackPanel>
-                            </Button>
-
-                            <Button x:Name="ExportSelectedButton"
-                                    Style="{StaticResource AccentOutlineButtonStyle}"
-                                    IsEnabled="False"
-                                    Click="ExportSelected_Click">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE72D;"
-                                               Style="{StaticResource IconTextStyle}"
-                                               Margin="0,0,9,0" />
-                                    <TextBlock Text="Export selected…" />
-                                </StackPanel>
-                            </Button>
-                        </WrapPanel>
-                    </Grid>
-
-                    <ScrollViewer Grid.Column="2"
+                    <ScrollViewer Grid.Column="2" Grid.Row="1"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
@@ -859,25 +828,43 @@
                 <Grid x:Name="OptimiserFooter" Grid.Row="2"
                       Margin="2,16,2,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="18" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="18" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="310" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding ImageCountText}"
-                               VerticalAlignment="Center"
-                               Style="{StaticResource MutedTextStyle}" />
+                    <WrapPanel Grid.Column="0" VerticalAlignment="Center"
+                               Margin="0">
+                        <Button x:Name="ExportAllButton"
+                                Style="{StaticResource AccentOutlineButtonStyle}"
+                                Margin="0,0,9,0"
+                                IsEnabled="False"
+                                Click="ExportAll_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72D;"
+                                           Style="{StaticResource IconTextStyle}"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="Export all successful…" />
+                            </StackPanel>
+                        </Button>
 
-                    <ProgressBar x:Name="OverallProgressBar"
-                                 Grid.Column="2"
-                                 Minimum="0"
-                                 Maximum="1"
-                                 Value="0"
-                                 VerticalAlignment="Center" />
+                        <Button x:Name="ExportSelectedButton"
+                                Style="{StaticResource AccentOutlineButtonStyle}"
+                                IsEnabled="False"
+                                Click="ExportSelected_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72D;"
+                                           Style="{StaticResource IconTextStyle}"
+                                           Margin="0,0,9,0" />
+                                <TextBlock Text="Export selected…" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="{Binding ImageCountText}"
+                                   Margin="16,0,0,0" VerticalAlignment="Center"
+                                   Style="{StaticResource MutedTextStyle}" />
+                    </WrapPanel>
 
-                    <StackPanel Grid.Column="4"
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Orientation="Horizontal">
                         <Button x:Name="OptimiseButton"
                                 Style="{StaticResource PrimaryButtonStyle}"
@@ -921,6 +908,7 @@
                                                FontSize="28"
                                                FontWeight="SemiBold" />
 
+                                    <TextBlock x:Name="ReleaseNotesUpdateStatusText" Margin="0,6,20,0" TextWrapping="Wrap" Style="{StaticResource MutedTextStyle}" />
                                     <TextBlock x:Name="ReleaseNotesStatus"
                                                Text="Checking for release notes…"
                                                Margin="0,6,20,0"
@@ -1001,11 +989,13 @@
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
+                                        VerticalAlignment="Top"
                                         Style="{StaticResource AccentOutlineButtonStyle}"
                                         Click="BackToOptimiser_Click">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE72B;"
                                                    Style="{StaticResource IconTextStyle}"
+                                                   Foreground="{DynamicResource AccentBrush}"
                                                    Margin="0,0,8,0" />
                                         <TextBlock Text="Back to optimiser" />
                                     </StackPanel>
@@ -1152,11 +1142,13 @@
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
+                                        VerticalAlignment="Top"
                                         Style="{StaticResource AccentOutlineButtonStyle}"
                                         Click="BackToOptimiser_Click">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE72B;"
                                                    Style="{StaticResource IconTextStyle}"
+                                                   Foreground="{DynamicResource AccentBrush}"
                                                    Margin="0,0,8,0" />
                                         <TextBlock Text="Back to optimiser" />
                                     </StackPanel>

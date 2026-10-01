@@ -30,7 +30,7 @@ jobs:
           }
           "RELEASE_VERSION=$($env:RELEASE_TAG.Substring(1))" >> $env:GITHUB_ENV
       - name: Test
-        run: dotnet test tests/NexMedia.WebImageOptimiser.Core.Tests/NexMedia.WebImageOptimiser.Core.Tests.csproj -c Release
+        run: dotnet test NexMedia.WebImageOptimiser.sln -c Release
       - name: Publish application
         run: dotnet publish src/NexMedia.WebImageOptimiser.Desktop/NexMedia.WebImageOptimiser.Desktop.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ env.RELEASE_VERSION }} -o artifacts/publish
       - name: Install packaging tool

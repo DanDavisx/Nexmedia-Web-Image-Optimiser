@@ -60,6 +60,8 @@ public partial class MainWindow : Window
         AppearanceManager.ApplyTheme(preferences.Theme);
         AppearanceManager.ApplyAnimations(preferences.InterfaceAnimationsEnabled);
         InitializeComponent();
+        releaseRefreshTimer.Tick += (_, _) => UpdateReleaseRefreshControls();
+        Closed += (_, _) => releaseRefreshTimer.Stop();
         Loaded += async (_, _) => await CheckForUpdatesAsync(manual: false);
         Loaded += async (_, _) => await LoadReleaseNotesAsync();
 
@@ -824,10 +826,6 @@ public partial class MainWindow : Window
 
         BatchActionsPanel.IsEnabled = false;
 
-        OverallProgressBar.Minimum = 0;
-        OverallProgressBar.Maximum = selectedImages.Length;
-        OverallProgressBar.Value = 0;
-
         try
         {
             await ShowOptimisingOverlayAsync(
@@ -863,7 +861,6 @@ public partial class MainWindow : Window
                 finally
                 {
                     completed++;
-                    OverallProgressBar.Value = completed;
                     OptimisingProgressText.Text =
                         $"{completed} of {selectedImages.Length} complete";
                 }
@@ -983,13 +980,8 @@ public partial class MainWindow : Window
         BatchActionsPanel.IsEnabled = false;
         ImagesGrid.IsEnabled = false;
 
-        OverallProgressBar.Minimum = 0;
-        OverallProgressBar.Maximum = images.Count;
-        OverallProgressBar.Value = 0;
-
         int successful = 0;
         int failed = 0;
-        int completed = 0;
 
         try
         {
@@ -1010,11 +1002,6 @@ public partial class MainWindow : Window
                 {
                     image.MarkExportFailed(exception.Message);
                     failed++;
-                }
-                finally
-                {
-                    completed++;
-                    OverallProgressBar.Value = completed;
                 }
             }
         }
