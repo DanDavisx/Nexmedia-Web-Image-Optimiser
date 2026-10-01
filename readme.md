@@ -1,4 +1,4 @@
-### **NexMedia Web Image Optimiser**
+# **NexMedia Web Image Optimiser**
 
 
 
@@ -8,7 +8,7 @@ A lightweight Windows desktop application for preparing and optimising images fo
 
 
 
-##### **Features**
+## **Features**
 
 
 
@@ -25,17 +25,13 @@ A lightweight Windows desktop application for preparing and optimising images fo
 
 
 
-##### **Download**
+## **Download**
 
 
 
-Download the latest version from the **Releases** page.
-
-
-Download **NexMedia.WebImageOptimiser-win-Setup.exe** if you are on a Windows machine.
-
-
-Run `Setup.exe` to install the application.
+* Find the latest version from the **Releases** page.
+* Download **NexMedia.WebImageOptimiser-win-Setup.exe** if you are on a Windows machine.
+* Run `Setup.exe` to install the application.
 
 
 NexMedia Web Image Optimiser is currently built for Windows x64.
@@ -44,7 +40,7 @@ NexMedia Web Image Optimiser is currently built for Windows x64.
 
 
 
-##### **Usage**
+## **Usage**
 
 
 
@@ -66,7 +62,7 @@ More detailed instructions are available from the built-in **Help** page.
 
 
 
-##### **Privacy**
+## **Privacy**
 
 
 
@@ -76,7 +72,7 @@ Image processing is performed locally on your computer. Images are not uploaded 
 
 
 
-##### **Updates**
+## **Updates**
 
 
 
@@ -86,7 +82,7 @@ The application periodically checks GitHub for new stable releases. Available up
 
 
 
-##### **Development Notes**
+## **Development Notes**
 
 
 
@@ -96,7 +92,7 @@ The project is built with C#, .NET and WPF, with VeloPack used for installation 
 
 
 
-##### **Feedback**
+## **Feedback**
 
 
 
