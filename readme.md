@@ -1,4 +1,4 @@
-# **NexMedia Web Image Optimiser**
+# **Nexmedia Web Image Optimiser**
 
 
 
