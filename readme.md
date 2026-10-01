@@ -29,12 +29,13 @@ A lightweight Windows desktop application for preparing and optimising images fo
 
 
 
-Download the latest version from the **\[GitHub Releases](../../releases/latest)** page.
+Download the latest version from the **Releases/** page.
 
+
+Download **NexMedia.WebImageOptimiser-win-Setup.exe** if you are on a Windows machine.
 
 
 Run `Setup.exe` to install the application.
-
 
 
 NexMedia Web Image Optimiser is currently built for Windows x64.
