@@ -30,7 +30,9 @@ A lightweight batch image optimiser designed for web use. Easily convert unoptim
 
 
 1\. Find the latest version from the **Releases** page.
+
 2\. Download **NexMedia.WebImageOptimiser-win-Setup.exe** if you are on a Windows machine.
+
 3\. Run `Setup.exe` to install the application.
 
 
