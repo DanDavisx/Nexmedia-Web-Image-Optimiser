@@ -29,7 +29,7 @@ A lightweight Windows desktop application for preparing and optimising images fo
 
 
 
-Download the latest version from the **Releases/** page.
+Download the latest version from the **Releases** page.
 
 
 Download **NexMedia.WebImageOptimiser-win-Setup.exe** if you are on a Windows machine.
