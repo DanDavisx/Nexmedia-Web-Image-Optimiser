@@ -100,7 +100,7 @@ The project is built with C#, .NET and WPF, with VeloPack used for installation 
 
 
 
-Bug reports and suggestions are welcome through **\[GitHub Issues](../../issues)**.
+Bug reports and suggestions are welcome through **GitHub Issues**.
 
 
 
