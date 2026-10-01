@@ -2,7 +2,7 @@
 
 
 
-A lightweight Windows desktop application for preparing and optimising images for use on the web. This application provides a simple batch workflow for importing, resizing, converting and compressing images without modifying the original files.
+A lightweight batch image optimiser designed for web use. Easily convert unoptimised images into suitable formats (mainly WEBP) all in one place.
 
 
 
